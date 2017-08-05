@@ -8,7 +8,7 @@ public:
 	~token() = default;
 	token(const token& rhs) = default;
 	token& operator=(const token& rhs) = default;
-private:
+//private:
 	size_t row,col;
 	std::string name;
 };

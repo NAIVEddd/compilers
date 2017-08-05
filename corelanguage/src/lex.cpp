@@ -1,8 +1,8 @@
+#include"base.h"
+#include"lex.h"
 #include<algorithm>
 #include<cctype>
 #include<set>
-#include"base.h"
-#include"lex.h"
 
 std::set<std::string> twocharop{ std::string("=="),std::string("/="),std::string("<="),std::string(">="),std::string("->") };
 
