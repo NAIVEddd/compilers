@@ -1,5 +1,6 @@
 #include"base.h"
 #include"syntax.h"
+#include<algorithm>
 #include<functional>
 using prd = std::function<bool(token)>;
 using tokens_list = std::vector<std::pair<std::string, std::vector<token>>>;
@@ -39,7 +40,6 @@ public:
 
 	std::function<out(in)> func;
 };
-transFunc<uint32_t, std::string> toInt([](std::string str) { return (uint32_t)std::stol(str); });
 
 template<typename out, typename in>
 std::vector<std::pair<out, std::vector<token>>>
@@ -53,4 +53,23 @@ pApply(const std::vector<token>& tokens, patten p, prd prdFunc, transFunc<out,in
 		result.push_back({ newfst,list[0].second });
 	}
 	return result;
+}
+
+std::vector<std::pair<std::string, std::vector<token>>>
+pVar(const std::vector<token>& tokens)
+{
+	const auto & keywordList = keywords;
+	prd isVar = [& keywordList](const token& tok) { return std::find(keywordList.cbegin(), keywordList.cend(), tok.name) == keywordList.cend(); };
+	return pSat(tokens, isVar);
+}
+
+std::vector<std::pair<uint32_t, std::vector<token>>>
+pNum(const std::vector<token>& tokens)
+{
+	prd isNum = [](const token& tok) { return std::all_of(tok.name.begin(), tok.name.end(), isdigit); };
+	transFunc<uint32_t, std::string> toInt([](std::string str) { return (uint32_t)std::stol(str); });
+	return pApply(tokens,
+		pSat,
+		isNum,
+		toInt);
 }

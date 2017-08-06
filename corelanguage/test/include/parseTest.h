@@ -1,6 +1,7 @@
 #pragma once
 #include"lex.h"
 #include"parse.h"
+#include"syntax.h"
 #include"syntax.cpp"
 #include<algorithm>
 #include<cctype>
@@ -8,6 +9,7 @@
 #include<string>
 #include<gtest/gtest.h>
 
+/**base test class*/
 class parseTest : public testing::Test
 {
 public:
@@ -15,13 +17,21 @@ public:
 	std::string code;
 };
 
-TEST_F(parseTest, testBaseLiteralParse)
+
+class simpleParseTest : public parseTest
+{
+};
+TEST_F(simpleParseTest, testBaseLiteralParse)
 {
 	code = "let";
 	auto basic_expr = parse(get());
+	// TODO: some error here. Process this later...
 }
 
-TEST_F(parseTest, testpLitParseFunc)
+class pLitParseTest : public parseTest
+{
+};
+TEST_F(pLitParseTest, testpLitParseFunc)
 {
 	code = "let";
 	auto codes = get();
@@ -39,14 +49,38 @@ TEST_F(parseTest, testpLitParseFunc)
 	ASSERT_EQ(i[0].first, "let");
 }
 
-TEST_F(parseTest, testpApplyParseForInt)
+class pNumParseTest : public parseTest
+{
+};
+TEST_F(pNumParseTest, testpNumParseForInt)
 {
 	code = "123";
 	auto codes = get();
-	prd isNum = [](token tok) { return std::all_of(tok.name.begin(), tok.name.end(), isdigit); };
-	auto res = pApply(codes,
-		pSat,
-		isNum,
-		toInt);
+	auto res = pNum(codes);
+	ASSERT_EQ(res.size(), 1);
+	ASSERT_EQ(res[0].first, 123);
+	ASSERT_EQ(res[0].second.size(), 0);
 
+	code = "let";
+	codes = get();
+	res = pNum(codes);
+	ASSERT_EQ(res.size(), 0);
+}
+
+class pVarParseTest : public parseTest
+{
+};
+TEST_F(pVarParseTest, testpVarParseForVariable)
+{
+	code = "notKeyword";
+	auto codes = get();
+	auto res = pVar(codes);
+	ASSERT_EQ(res.size(), 1);
+	ASSERT_EQ(res[0].first, code);
+	ASSERT_EQ(res[0].second.size(), 0);
+
+	code = "let";
+	codes = get();
+	res = pVar(codes);
+	ASSERT_EQ(res.size(), 0);
 }
