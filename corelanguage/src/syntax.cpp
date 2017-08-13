@@ -55,7 +55,7 @@ pApply(const std::vector<token>& tokens, patten p, prd prdFunc, transFunc<out,in
 	return result;
 }
 
-std::vector<std::pair<std::string, std::vector<token>>>
+tokens_list
 pVar(const std::vector<token>& tokens)
 {
 	const auto & keywordList = keywords;
@@ -72,4 +72,26 @@ pNum(const std::vector<token>& tokens)
 		pSat,
 		isNum,
 		toInt);
+}
+
+template<typename result_type, typename parser>
+result_type
+pOr(parser p1, parser p2, const std::vector<token>& tokens)
+{
+	auto res1 = p1(tokens);
+	auto res2 = p2(tokens);
+	if (!res1.size())
+	{
+		return res2;
+	}
+	else if (!res2.size())
+	{
+		return res1;
+	}
+
+	for (auto& tok : res2)
+	{
+		res1.push_back(tok);
+	}
+	return res1;
 }

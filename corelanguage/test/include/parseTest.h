@@ -18,15 +18,15 @@ public:
 };
 
 
-class simpleParseTest : public parseTest
-{
-};
-TEST_F(simpleParseTest, testBaseLiteralParse)
-{
-	code = "let";
-	auto basic_expr = parse(get());
-	// TODO: some error here. Process this later...
-}
+//class simpleParseTest : public parseTest
+//{
+//};
+//TEST_F(simpleParseTest, testBaseLiteralParse)
+//{
+//	code = "let";
+//	auto basic_expr = parse(get());
+//	// TODO: some error here. Process this later...
+//}
 
 class pLitParseTest : public parseTest
 {
@@ -83,4 +83,51 @@ TEST_F(pVarParseTest, testpVarParseForVariable)
 	codes = get();
 	res = pVar(codes);
 	ASSERT_EQ(res.size(), 0);
+}
+
+class pOrParseTest : public parseTest
+{
+};
+TEST_F(pOrParseTest, testpOrParseKeyword)
+{
+	code = "let";
+	auto codes = get();
+	
+	auto res = pOr<tokens_list, decltype(pVar)>(pVar, [](const std::vector<token>& tokens)
+		{
+			return pLit(tokens, "let");
+		}, codes);
+
+	ASSERT_EQ(res.size(), 1);
+	ASSERT_EQ(res[0].first, std::string("let"));
+
+	//----------------------------
+	res = pOr<tokens_list, decltype(pVar)>(pVar, [](const std::vector<token>& tokens)
+		{
+			return pLit(tokens, "hello");
+		}, codes);
+
+	ASSERT_EQ(res.size(), 0);
+
+	// --------------------------
+	code = "hello";
+	codes = get();
+
+	res = pOr<tokens_list, decltype(pVar)>(pVar, [](const std::vector<token>& tokens)
+		{
+			return pLit(tokens, "let");
+		}, codes);
+
+	ASSERT_EQ(res.size(), 1);
+	ASSERT_EQ(res[0].first, std::string("hello"));
+
+	// -------------------------
+	res = pOr<tokens_list, decltype(pVar)>(pVar, [](const std::vector<token>& tokens)
+		{
+			return pLit(tokens, "hello");
+		}, codes);
+
+	ASSERT_EQ(res.size(), 2);
+	ASSERT_EQ(res[0].first, std::string("hello"));
+	ASSERT_EQ(res[1].first, std::string("hello"));
 }
