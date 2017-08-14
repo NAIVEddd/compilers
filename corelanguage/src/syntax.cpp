@@ -95,3 +95,13 @@ pOr(parser p1, parser p2, const std::vector<token>& tokens)
 	}
 	return res1;
 }
+
+/*template<typename result_type, typename parser>
+result_type
+pThen(parser p1, parser pb, const std::vector<token>& tokens)
+{
+	auto res1 = p1(tokens);
+	auto res2 = p1(res1[0].second);
+
+	return std::make_pair((res1[0].first, res2[0].first), res2[0].second);
+}*/
