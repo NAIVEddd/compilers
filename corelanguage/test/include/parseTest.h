@@ -135,23 +135,30 @@ TEST_F(pOrParseTest, testpOrParseKeyword)
 class pThenParseTest : public parseTest
 {
 };
-TEST_F(pThenParseTest, testpThenParse)
+#include"parse.h"
+TEST_F(pThenParseTest, testParserBaseClass)
 {
-	code = "let me down";
-	auto codes = get();
-
-	auto res = pThen([](const std::vector<token>& tokens)
-		{
-			return pLit(tokens, "let");
-		},
-			[](const std::vector<token>& tokens)
-		{
-			return pLit(tokens, "me");
-		}, codes);
-	
-	ASSERT_EQ(res.size(), 1);
-	ASSERT_EQ(res[0].first.first, std::string("let"));
-	ASSERT_EQ(res[0].first.second, std::string("me"));
-	ASSERT_EQ(res[0].second.size(), 1);
-	ASSERT_EQ(res[0].second[0], std::string("down"));
+	PLit<std::string> temp;
+	std::vector<token> ttt;
+	temp(ttt);
 }
+//TEST_F(pThenParseTest, testpThenParse)
+//{
+//	code = "let me down";
+//	auto codes = get();
+//
+//	auto res = pThen([](const std::vector<token>& tokens)
+//		{
+//			return pLit(tokens, "let");
+//		},
+//			[](const std::vector<token>& tokens)
+//		{
+//			return pLit(tokens, "me");
+//		}, codes);
+//	
+//	ASSERT_EQ(res.size(), 1);
+//	ASSERT_EQ(res[0].first.first, std::string("let"));
+//	ASSERT_EQ(res[0].first.second, std::string("me"));
+//	ASSERT_EQ(res[0].second.size(), 1);
+//	ASSERT_EQ(res[0].second[0], std::string("down"));
+//}
