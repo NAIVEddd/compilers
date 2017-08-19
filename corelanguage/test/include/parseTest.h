@@ -36,7 +36,6 @@ struct pSatParseTest : public parseTest
 		get();
 	}
 };
-
 TEST_F(pSatParseTest, pSatParseIsString)
 {
 	init();
@@ -44,9 +43,9 @@ TEST_F(pSatParseTest, pSatParseIsString)
 	
 	auto& res = isString(codes);
 
-	ASSERT_EQ(res.size(), 1);
-	ASSERT_EQ(res.at(0).first, "let");
-	ASSERT_EQ(res.at(0).second.size(), 0);
+	ASSERT_EQ(1, res.size());
+	ASSERT_EQ("let", res.at(0).first);
+	ASSERT_EQ(0, res.at(0).second.size());
 }
 
 struct pLitParseTest : public parseTest
@@ -69,8 +68,8 @@ TEST_F(pLitParseTest, testpLitParseFunc)
 
 	auto i = isLet(codes);
 
-	ASSERT_EQ(i.size(), 1);
-	ASSERT_EQ(i[0].first, code);
+	ASSERT_EQ(1, i.size());
+	ASSERT_EQ(code, i[0].first);
 
 	//-------------
 	init1();
@@ -78,14 +77,33 @@ TEST_F(pLitParseTest, testpLitParseFunc)
 
 	i = is123(codes);
 
-	ASSERT_EQ(i.size(), 1);
-	ASSERT_EQ(i[0].first, "123");
+	ASSERT_EQ(1, i.size());
+	ASSERT_EQ("123", i[0].first);
 
 	//-------------
 	i = isLet(i[0].second);
 
-	ASSERT_EQ(i.size(), 1);
-	ASSERT_EQ(i[0].first, "let");
+	ASSERT_EQ(1, i.size());
+	ASSERT_EQ("let", i[0].first);
+}
+
+struct pApplyParseTest : public parseTest
+{
+	void init()
+	{
+		code = "123";
+		get();
+	}
+};
+TEST_F(pApplyParseTest, testpApplyParseInt)
+{
+	init();
+	pVar isVar;
+	pApply<std::string, int> toInt(isVar, [](std::string str) {return stoi(str); });
+
+	auto res = toInt(codes);
+
+	ASSERT_EQ(1, res.size());
 }
 
 struct pVarParseTest : public parseTest
@@ -100,6 +118,11 @@ struct pVarParseTest : public parseTest
 		code = "let";
 		get();
 	}
+	void init2()
+	{
+		code = "+";
+		get();
+	}
 };
 TEST_F(pVarParseTest, testpVarParseForVariable)
 {
@@ -107,14 +130,18 @@ TEST_F(pVarParseTest, testpVarParseForVariable)
 	pVar isVar;
 	auto res = isVar(codes);
 
-	ASSERT_EQ(res.size(), 1);
-	ASSERT_EQ(res[0].first, code);
-	ASSERT_EQ(res[0].second.size(), 0);
+	ASSERT_EQ(1, res.size());
+	ASSERT_EQ(code, res[0].first);
+	ASSERT_EQ(0, res[0].second.size());
 
 
 	init1();
 	res = isVar(codes);
-	ASSERT_EQ(res.size(), 0);
+	ASSERT_EQ(0, res.size());
+
+	init2();
+	res = isVar(codes);
+	ASSERT_EQ(0, res.size());
 }
 
 struct pNumParseTest : public parseTest
@@ -136,13 +163,13 @@ TEST_F(pNumParseTest, testpNumParseForInt)
 	pNum isNum;
 	auto res = isNum(codes);
 
-	ASSERT_EQ(res.size(), 1);
-	ASSERT_EQ(res[0].first, 123);
-	ASSERT_EQ(res[0].second.size(), 0);
+	ASSERT_EQ(1, res.size());
+	ASSERT_EQ(123, res[0].first);
+	ASSERT_EQ(0, res[0].second.size());
 
 	init1();
 	res = isNum(codes);
-	ASSERT_EQ(res.size(), 0);
+	ASSERT_EQ(0, res.size());
 }
 
 //class pOrParseTest : public parseTest
