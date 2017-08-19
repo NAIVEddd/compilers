@@ -172,80 +172,115 @@ TEST_F(pNumParseTest, testpNumParseForInt)
 	ASSERT_EQ(0, res.size());
 }
 
-//class pOrParseTest : public parseTest
-//{
-//};
-//TEST_F(pOrParseTest, testpOrParseKeyword)
-//{
-//	code = "let";
-//	auto codes = get();
-//	
-//	auto res = pOr<tokens_list, decltype(pVar)>(pVar, [](const std::vector<token>& tokens)
-//		{
-//			return pLit(tokens, "let");
-//		}, codes);
-//
-//	ASSERT_EQ(res.size(), 1);
-//	ASSERT_EQ(res[0].first, std::string("let"));
-//
-//	//----------------------------
-//	res = pOr<tokens_list, decltype(pVar)>(pVar, [](const std::vector<token>& tokens)
-//		{
-//			return pLit(tokens, "hello");
-//		}, codes);
-//
-//	ASSERT_EQ(res.size(), 0);
-//
-//	// --------------------------
-//	code = "hello";
-//	codes = get();
-//
-//	res = pOr<tokens_list, decltype(pVar)>(pVar, [](const std::vector<token>& tokens)
-//		{
-//			return pLit(tokens, "let");
-//		}, codes);
-//
-//	ASSERT_EQ(res.size(), 1);
-//	ASSERT_EQ(res[0].first, std::string("hello"));
-//
-//	// -------------------------
-//	res = pOr<tokens_list, decltype(pVar)>(pVar, [](const std::vector<token>& tokens)
-//		{
-//			return pLit(tokens, "hello");
-//		}, codes);
-//
-//	ASSERT_EQ(res.size(), 2);
-//	ASSERT_EQ(res[0].first, std::string("hello"));
-//	ASSERT_EQ(res[1].first, std::string("hello"));
-//}
-//
-//class pThenParseTest : public parseTest
-//{
-//};
-//#include"parse.h"
-//TEST_F(pThenParseTest, testParserBaseClass)
-//{
-//	PLit<std::string> temp;
-//	std::vector<token> ttt;
-//	temp(ttt);
-//}
-//TEST_F(pThenParseTest, testpThenParse)
-//{
-//	code = "let me down";
-//	auto codes = get();
-//
-//	auto res = pThen([](const std::vector<token>& tokens)
-//		{
-//			return pLit(tokens, "let");
-//		},
-//			[](const std::vector<token>& tokens)
-//		{
-//			return pLit(tokens, "me");
-//		}, codes);
-//	
-//	ASSERT_EQ(res.size(), 1);
-//	ASSERT_EQ(res[0].first.first, std::string("let"));
-//	ASSERT_EQ(res[0].first.second, std::string("me"));
-//	ASSERT_EQ(res[0].second.size(), 1);
-//	ASSERT_EQ(res[0].second[0], std::string("down"));
-//}
+struct pOrParseTest : public parseTest
+{
+	void init()
+	{
+		code = "let";
+		get();
+	}
+	void init1()
+	{
+		code = "hello";
+		get();
+	}
+};
+TEST_F(pOrParseTest, testpOrParseKeyword)
+{
+	init();
+	pVar isVar;
+	pLit<std::string> isLet("let");
+	pOr<std::string> varOrLet(isVar, isLet);
+
+	auto res = varOrLet(codes);
+
+	ASSERT_EQ(1, res.size());
+	ASSERT_EQ(std::string("let"), res[0].first);
+
+	//----------------------------
+	pLit<std::string> isHello("hello");
+	pOr<std::string> varOrHello(isVar, isHello);
+	res = varOrHello(codes);
+
+	ASSERT_EQ(0, res.size());
+
+	// --------------------------
+	init1();
+
+	res = varOrLet(codes);
+
+	ASSERT_EQ(1, res.size());
+	ASSERT_EQ(std::string("hello"), res[0].first);
+
+	// -------------------------
+	res = varOrHello(codes);
+
+	ASSERT_EQ(2, res.size());
+	ASSERT_EQ(std::string("hello"), res[0].first);
+	ASSERT_EQ(std::string("hello"), res[1].first);
+}
+
+struct pThenParseTest : public parseTest
+{
+	void init()
+	{
+		code = "let me down";
+		get();
+	}
+	void init1()
+	{
+		code = "equal 11";
+		get();
+	}
+};
+TEST_F(pThenParseTest, testpThenParse)
+{
+	init();
+	pLit<std::string> isLet("let");
+	pLit<std::string> isMe("me");
+	pThen<std::string, std::string, std::pair<std::string, std::string>> str_pair(isLet, isMe, std::make_pair<std::string,std::string>);
+
+	auto res = str_pair(codes);
+	
+	ASSERT_EQ(1, res.size());
+	ASSERT_EQ(std::string("let"), res[0].first.first);
+	ASSERT_EQ(std::string("me"), res[0].first.second);
+	ASSERT_EQ(1, res[0].second.size());
+	ASSERT_EQ(std::string("down"), res[0].second[0].name);
+
+	init1();
+	pLit<std::string> isEqual("equal");
+	pNum isNum;
+	pThen <std::string, int, std::pair<std::string, int>> str_int(isEqual, isNum, std::make_pair<std::string, int>);
+
+	auto res1 = str_int(codes);
+
+	ASSERT_EQ(1, res1.size());
+	ASSERT_EQ(std::string("equal"), res1[0].first.first);
+	ASSERT_EQ(11, res1[0].first.second);
+}
+
+struct pEmptyParseTest : public parseTest
+{
+	void init()
+	{
+		code = "let me down";
+		get();
+	}
+};
+TEST_F(pEmptyParseTest, testpThenParse)
+{
+	init();
+
+	pEmpty<int> defInt(0);
+	auto res = defInt(codes);
+
+	ASSERT_EQ(1, res.size());
+	ASSERT_EQ(0, res.at(0).first);
+
+	pEmpty<std::string> defStr("empty");
+	auto res1 = defStr(codes);
+
+	ASSERT_EQ(1, res.size());
+	ASSERT_EQ(std::string("empty"), res.at(0).first);
+}
