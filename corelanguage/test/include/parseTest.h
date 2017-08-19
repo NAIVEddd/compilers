@@ -2,7 +2,6 @@
 #include"lex.h"
 #include"parse.h"
 #include"syntax.h"
-#include"syntax.cpp"
 #include<algorithm>
 #include<cctype>
 #include<functional>
@@ -13,8 +12,9 @@
 class parseTest : public testing::Test
 {
 public:
-	std::vector<token> get() const { return lex(code); }
+	void get() { codes = lex(code); }
 	std::string code;
+	std::vector<token> codes;
 };
 
 
@@ -28,120 +28,180 @@ public:
 //	// TODO: some error here. Process this later...
 //}
 
-class pLitParseTest : public parseTest
+struct pSatParseTest : public parseTest
 {
+	void init()
+	{
+		code = "let";
+		get();
+	}
+};
+
+TEST_F(pSatParseTest, pSatParseIsString)
+{
+	init();
+	pSat<std::string> isString([](std::string str) {return true; });
+	
+	auto& res = isString(codes);
+
+	ASSERT_EQ(res.size(), 1);
+	ASSERT_EQ(res.at(0).first, "let");
+	ASSERT_EQ(res.at(0).second.size(), 0);
+}
+
+struct pLitParseTest : public parseTest
+{
+	void init()
+	{
+		code = "let";
+		get();
+	}
+	void init1()
+	{
+		code = "123 let";
+		get();
+	}
 };
 TEST_F(pLitParseTest, testpLitParseFunc)
 {
-	code = "let";
-	auto codes = get();
-	auto i = pLit(codes, "let");
+	init();
+	pLit<std::string> isLet("let");
+
+	auto i = isLet(codes);
+
 	ASSERT_EQ(i.size(), 1);
 	ASSERT_EQ(i[0].first, code);
 
-	code = "123 let";
-	codes = get();
-	i = pLit(codes, "123");
+	//-------------
+	init1();
+	pLit<std::string> is123("123");
+
+	i = is123(codes);
+
 	ASSERT_EQ(i.size(), 1);
 	ASSERT_EQ(i[0].first, "123");
-	i = pLit(i[0].second, "let");
+
+	//-------------
+	i = isLet(i[0].second);
+
 	ASSERT_EQ(i.size(), 1);
 	ASSERT_EQ(i[0].first, "let");
 }
 
-class pNumParseTest : public parseTest
+struct pVarParseTest : public parseTest
 {
-};
-TEST_F(pNumParseTest, testpNumParseForInt)
-{
-	code = "123";
-	auto codes = get();
-	auto res = pNum(codes);
-	ASSERT_EQ(res.size(), 1);
-	ASSERT_EQ(res[0].first, 123);
-	ASSERT_EQ(res[0].second.size(), 0);
-
-	code = "let";
-	codes = get();
-	res = pNum(codes);
-	ASSERT_EQ(res.size(), 0);
-}
-
-class pVarParseTest : public parseTest
-{
+	void init()
+	{
+		code = "notKeyword";
+		get();
+	}
+	void init1()
+	{
+		code = "let";
+		get();
+	}
 };
 TEST_F(pVarParseTest, testpVarParseForVariable)
 {
-	code = "notKeyword";
-	auto codes = get();
-	auto res = pVar(codes);
+	init();
+	pVar isVar;
+	auto res = isVar(codes);
+
 	ASSERT_EQ(res.size(), 1);
 	ASSERT_EQ(res[0].first, code);
 	ASSERT_EQ(res[0].second.size(), 0);
 
-	code = "let";
-	codes = get();
-	res = pVar(codes);
+
+	init1();
+	res = isVar(codes);
 	ASSERT_EQ(res.size(), 0);
 }
 
-class pOrParseTest : public parseTest
+struct pNumParseTest : public parseTest
 {
+	void init()
+	{
+		code = "123";
+		get();
+	}
+	void init1()
+	{
+		code = "let";
+		get();
+	}
 };
-TEST_F(pOrParseTest, testpOrParseKeyword)
+TEST_F(pNumParseTest, testpNumParseForInt)
 {
-	code = "let";
-	auto codes = get();
-	
-	auto res = pOr<tokens_list, decltype(pVar)>(pVar, [](const std::vector<token>& tokens)
-		{
-			return pLit(tokens, "let");
-		}, codes);
+	init();
+	pNum isNum;
+	auto res = isNum(codes);
 
 	ASSERT_EQ(res.size(), 1);
-	ASSERT_EQ(res[0].first, std::string("let"));
+	ASSERT_EQ(res[0].first, 123);
+	ASSERT_EQ(res[0].second.size(), 0);
 
-	//----------------------------
-	res = pOr<tokens_list, decltype(pVar)>(pVar, [](const std::vector<token>& tokens)
-		{
-			return pLit(tokens, "hello");
-		}, codes);
-
+	init1();
+	res = isNum(codes);
 	ASSERT_EQ(res.size(), 0);
-
-	// --------------------------
-	code = "hello";
-	codes = get();
-
-	res = pOr<tokens_list, decltype(pVar)>(pVar, [](const std::vector<token>& tokens)
-		{
-			return pLit(tokens, "let");
-		}, codes);
-
-	ASSERT_EQ(res.size(), 1);
-	ASSERT_EQ(res[0].first, std::string("hello"));
-
-	// -------------------------
-	res = pOr<tokens_list, decltype(pVar)>(pVar, [](const std::vector<token>& tokens)
-		{
-			return pLit(tokens, "hello");
-		}, codes);
-
-	ASSERT_EQ(res.size(), 2);
-	ASSERT_EQ(res[0].first, std::string("hello"));
-	ASSERT_EQ(res[1].first, std::string("hello"));
 }
 
-class pThenParseTest : public parseTest
-{
-};
-#include"parse.h"
-TEST_F(pThenParseTest, testParserBaseClass)
-{
-	PLit<std::string> temp;
-	std::vector<token> ttt;
-	temp(ttt);
-}
+//class pOrParseTest : public parseTest
+//{
+//};
+//TEST_F(pOrParseTest, testpOrParseKeyword)
+//{
+//	code = "let";
+//	auto codes = get();
+//	
+//	auto res = pOr<tokens_list, decltype(pVar)>(pVar, [](const std::vector<token>& tokens)
+//		{
+//			return pLit(tokens, "let");
+//		}, codes);
+//
+//	ASSERT_EQ(res.size(), 1);
+//	ASSERT_EQ(res[0].first, std::string("let"));
+//
+//	//----------------------------
+//	res = pOr<tokens_list, decltype(pVar)>(pVar, [](const std::vector<token>& tokens)
+//		{
+//			return pLit(tokens, "hello");
+//		}, codes);
+//
+//	ASSERT_EQ(res.size(), 0);
+//
+//	// --------------------------
+//	code = "hello";
+//	codes = get();
+//
+//	res = pOr<tokens_list, decltype(pVar)>(pVar, [](const std::vector<token>& tokens)
+//		{
+//			return pLit(tokens, "let");
+//		}, codes);
+//
+//	ASSERT_EQ(res.size(), 1);
+//	ASSERT_EQ(res[0].first, std::string("hello"));
+//
+//	// -------------------------
+//	res = pOr<tokens_list, decltype(pVar)>(pVar, [](const std::vector<token>& tokens)
+//		{
+//			return pLit(tokens, "hello");
+//		}, codes);
+//
+//	ASSERT_EQ(res.size(), 2);
+//	ASSERT_EQ(res[0].first, std::string("hello"));
+//	ASSERT_EQ(res[1].first, std::string("hello"));
+//}
+//
+//class pThenParseTest : public parseTest
+//{
+//};
+//#include"parse.h"
+//TEST_F(pThenParseTest, testParserBaseClass)
+//{
+//	PLit<std::string> temp;
+//	std::vector<token> ttt;
+//	temp(ttt);
+//}
 //TEST_F(pThenParseTest, testpThenParse)
 //{
 //	code = "let me down";
