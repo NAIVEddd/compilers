@@ -198,3 +198,113 @@ private:
 	parser<T2>& p2;
 	std::function<T3(T1, T2)> f;
 };
+
+template<typename T>
+class pEmpty : parser<T>
+{
+public:
+	using parser<T>::result_t;
+
+	pEmpty() : set_default(false) {}
+	pEmpty(T _val) : set_default(true), value(_val) {}
+	result_t
+		operator()(std::vector<token>& prog)override
+	{
+		if (set_default)
+		{
+			auto& res = result_t();
+			res.push_back(std::make_pair(value, prog));
+			return std::move(res);
+		}
+		return result_t();
+	}
+
+private:
+	bool set_default;
+	T value;
+};
+
+template<typename T1, typename T2, typename T3, typename T4>
+class pThen3 : public parser<T4>
+{
+public:
+	using parser<T4>::result_t;
+
+	pThen3(parser<T1>& _p1, parser<T2>& _p2, parser<T3>& _p3, std::function<T4(T1, T2, T3)> _f) :
+		p1(_p1),
+		p2(_p2),
+		p3(_p3),
+		f(_f)
+	{};
+	pThen3(parser<T1>&& _p1, parser<T2>&& _p2, parser<T3>&& _p3, std::function<T4(T1, T2, T3)> _f) = delete;
+	result_t
+		operator()(std::vector<token>& prog)override
+	{
+		try
+		{
+			auto& res1 = p1(prog);
+			auto& res2 = p2(res1.at(0).second);
+			auto& res_second_3 = p3(res2.at(0).second);
+
+			auto& res_first = f(res1[0].first, res2[0].first, res_second_3[0].first);
+
+			auto res = result_t();
+			res.push_back(std::make_pair(res_first, res_second_3[0].second));
+			return std::move(res);
+		}
+		catch (const std::out_of_range&)
+		{
+			return result_t();
+		}
+	}
+
+private:
+	parser<T1>& p1;
+	parser<T2>& p2;
+	parser<T3>& p3;
+	std::function<T4(T1, T2, T3)> f;
+};
+
+template<typename T1, typename T2, typename T3, typename T4, typename T5>
+class pThen4 : parser<T5>
+{
+public:
+	using parser<T5>::result_t;
+
+	pThen4(parser<T1>& _p1, parser<T2>& _p2, parser<T3>& _p3, parser<T4>& _p4, std::function<T5(T1, T2, T3, T4)> _f) :
+		p1(_p1),
+		p2(_p2),
+		p3(_p3),
+		p4(_p4),
+		f(_f)
+	{};
+	pThen4(parser<T1>&& _p1, parser<T2>&& _p2, parser<T3>&& _p3, parser<T4>&& _p4, std::function<T5(T1, T2, T3, T4)> _f) = delete;
+	result_t
+		operator()(std::vector<token>& prog)override
+	{
+		try
+		{
+			auto& res1 = p1(prog);
+			auto& res2 = p2(res1.at(0).second);
+			auto& res3 = p3(res2.at(0).second);
+			auto& res_second_4 = p4(res3.at(0).second);
+
+			auto& res_first = f(res1[0].first, res2[0].first, res3[0].first, res_second_4.at(0).first);
+
+			auto res = result_t();
+			res.push_back(std::make_pair(res_first, res_second_4[0].second));
+			return std::move(res);
+		}
+		catch (const std::out_of_range&)
+		{
+			return result_t();
+		}
+	}
+
+private:
+	parser<T1>& p1;
+	parser<T2>& p2;
+	parser<T3>& p3;
+	parser<T4>& p4;
+	std::function<T5(T1, T2, T3, T4)> f;
+};

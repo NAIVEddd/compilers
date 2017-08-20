@@ -260,6 +260,58 @@ TEST_F(pThenParseTest, testpThenParse)
 	ASSERT_EQ(11, res1[0].first.second);
 }
 
+struct pThen3ParseTest : public parseTest
+{
+	void init()
+	{
+		code = "let me down";
+		get();
+	}
+};
+TEST_F(pThen3ParseTest, testpThen3Parse)
+{
+	init();
+	pLit<std::string> isLet("let");
+	pLit<std::string> isMe("me");
+	pLit<std::string> isDown("down");
+	pThen3<std::string, std::string, std::string, std::tuple<std::string, std::string, std::string>> tribleStr(isLet, isMe, isDown, std::make_tuple<std::string, std::string, std::string>);
+
+	auto& res = tribleStr(codes);
+
+	ASSERT_EQ(1, res.size());
+	ASSERT_EQ(std::string("let"), std::get<0>(res[0].first));
+	ASSERT_EQ(std::string("me"), std::get<1>(res[0].first));
+	ASSERT_EQ(std::string("down"), std::get<2>(res[0].first));
+	ASSERT_EQ(0, res[0].second.size());
+}
+
+struct pThen4ParseTest : public parseTest
+{
+	void init()
+	{
+		code = "let me down!";
+		get();
+	}
+};
+TEST_F(pThen4ParseTest, testpThen3Parse)
+{
+	init();
+	pLit<std::string> isLet("let");
+	pLit<std::string> isMe("me");
+	pLit<std::string> isDown("down");
+	pLit<std::string> isPunct("!");
+	pThen4<std::string, std::string, std::string, std::string, std::tuple<std::string, std::string, std::string, std::string>> fourStr(isLet, isMe, isDown, isPunct, std::make_tuple<std::string, std::string, std::string, std::string>);
+
+	auto& res = fourStr(codes);
+
+	ASSERT_EQ(1, res.size());
+	ASSERT_EQ(std::string("let"), std::get<0>(res[0].first));
+	ASSERT_EQ(std::string("me"), std::get<1>(res[0].first));
+	ASSERT_EQ(std::string("down"), std::get<2>(res[0].first));
+	ASSERT_EQ(std::string("!"), std::get<3>(res[0].first));
+	ASSERT_EQ(0, res[0].second.size());
+}
+
 struct pEmptyParseTest : public parseTest
 {
 	void init()
@@ -281,6 +333,11 @@ TEST_F(pEmptyParseTest, testpThenParse)
 	pEmpty<std::string> defStr("empty");
 	auto res1 = defStr(codes);
 
-	ASSERT_EQ(1, res.size());
-	ASSERT_EQ(std::string("empty"), res.at(0).first);
+	ASSERT_EQ(1, res1.size());
+	ASSERT_EQ(std::string("empty"), res1.at(0).first);
+
+	pEmpty<std::string> defCons;
+	auto res2 = defCons(codes);
+	
+	ASSERT_EQ(0, res2.size());
 }
