@@ -200,7 +200,7 @@ private:
 };
 
 template<typename T>
-class pEmpty : parser<T>
+class pEmpty : public parser<T>
 {
 public:
 	using parser<T>::result_t;
@@ -210,13 +210,16 @@ public:
 	result_t
 		operator()(std::vector<token>& prog)override
 	{
+		auto& res = result_t();
 		if (set_default)
 		{
-			auto& res = result_t();
 			res.push_back(std::make_pair(value, prog));
-			return std::move(res);
 		}
-		return result_t();
+		else
+		{
+			res.push_back(std::make_pair(T(), prog));
+		}
+		return std::move(res);
 	}
 
 private:
@@ -307,4 +310,71 @@ private:
 	parser<T3>& p3;
 	parser<T4>& p4;
 	std::function<T5(T1, T2, T3, T4)> f;
+};
+
+template<typename T> class pOneOrMore;
+template<typename T>
+class pZeroOrMore : public parser<std::vector<T>>
+{
+public:
+	using parser<std::vector<T>>::result_t;
+
+	pZeroOrMore(parser<T>& _p):
+		p(_p)
+	{}
+	result_t
+		operator()(std::vector<token>& prog)override
+	{
+		pEmpty<std::vector<T>> empty;
+		pOr<std::vector<T>> parse_zero_or_more(p, empty);
+		return std::move(parse_zero_or_more(prog));
+		//auto res = p(prog);
+		//if (res.size() == 0)
+		//{
+		//	res.push_back(std::make_pair(result_t::value_type::first_type(), prog));
+		//}
+		//return std::move(res);
+	}
+private:
+	pOneOrMore<T> p;
+};
+
+template<typename T>
+class pOneOrMore : public parser<std::vector<T>>
+{
+public:
+	using parser<std::vector<T>>::result_t;
+
+	pOneOrMore(parser<T>& _p) :
+		p(_p)
+	{};
+	result_t
+		operator()(std::vector<token>& prog)override
+	{
+		try
+		{
+			auto res_first = p(prog);
+			auto res_second = this->operator()(res_first.at(0).second);
+			auto res = result_t();
+			auto tmp = result_t::value_type::first_type();
+			tmp.push_back(res_first[0].first);
+			if (res_second.size() == 0)
+			{
+				res.push_back(std::make_pair(tmp, result_t::value_type::second_type()));
+				return std::move(res);
+			}
+			res.push_back(std::make_pair(tmp, res_second[0].second));
+			for (auto& r : res_second[0].first)
+			{
+				res[0].first.push_back(r);
+			}
+			return std::move(res);
+		}
+		catch (const std::out_of_range&)
+		{
+			return result_t();
+		}
+	}
+private:
+	parser<T>& p;
 };

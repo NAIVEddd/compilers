@@ -339,5 +339,75 @@ TEST_F(pEmptyParseTest, testpThenParse)
 	pEmpty<std::string> defCons;
 	auto res2 = defCons(codes);
 	
-	ASSERT_EQ(0, res2.size());
+	ASSERT_EQ(1, res2.size());
+}
+
+struct pOneOrMoreParseTest : public parseTest
+{
+	void init()
+	{
+		code = "let let let";
+		get();
+	}
+	void init1()
+	{
+		code = "";
+		get();
+	}
+};
+TEST_F(pOneOrMoreParseTest, testpOneOrMoreParse)
+{
+	init();
+
+	pLit<std::string> isLet("let");
+	pOneOrMore<std::string> oneOrMore(isLet);
+	auto res = oneOrMore(codes);
+
+	ASSERT_EQ(1, res.size());
+	ASSERT_EQ(3, res[0].first.size());
+	ASSERT_EQ(std::string("let"), res[0].first.at(0));
+	ASSERT_EQ(std::string("let"), res[0].first.at(1));
+	ASSERT_EQ(std::string("let"), res[0].first.at(2));
+
+	init1();
+
+	res = oneOrMore(codes);
+
+	ASSERT_EQ(0, res.size());
+}
+
+struct pZeroOrMoreParseTest : public parseTest
+{
+	void init()
+	{
+		code = "let let let";
+		get();
+	}
+	void init1()
+	{
+		code = "";
+		get();
+	}
+};
+TEST_F(pZeroOrMoreParseTest, testpZeroOrMoreParse)
+{
+	init();
+
+	pLit<std::string> isLet("let");
+	pZeroOrMore<std::string> zeroOrMoreLet(isLet);
+	auto res = zeroOrMoreLet(codes);
+
+	ASSERT_EQ(2, res.size());
+	ASSERT_EQ(3, res[0].first.size());
+	ASSERT_EQ(std::string("let"), res[0].first.at(0));
+	ASSERT_EQ(std::string("let"), res[0].first.at(1));
+	ASSERT_EQ(std::string("let"), res[0].first.at(2));
+
+	init1();
+
+	pLit<std::string> isHello("hello");
+	pZeroOrMore<std::string> zeroOrMoreHello(isHello);
+	res = zeroOrMoreHello(codes);
+
+	ASSERT_EQ(1, res.size());
 }
