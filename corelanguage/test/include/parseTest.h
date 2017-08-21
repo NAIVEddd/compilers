@@ -411,3 +411,25 @@ TEST_F(pZeroOrMoreParseTest, testpZeroOrMoreParse)
 
 	ASSERT_EQ(1, res.size());
 }
+
+struct pOneOrMoreWithSptParseTest : public parseTest
+{
+	void init()
+	{
+		code = "let, let, let";
+		get();
+	}
+};
+TEST_F(pOneOrMoreWithSptParseTest, testpOneOrMoreWithSptParse)
+{
+	init();
+
+	pLit<std::string> isLet("let");
+	pLit<std::string> isPunct(",");
+	pOneOrMoreWithSpt<std::string,std::string> oneOrMoreLet(isLet, isPunct);
+	auto& res = oneOrMoreLet(codes);
+
+	ASSERT_EQ(1, res.size());
+	ASSERT_EQ(3, res[0].first.size());
+	ASSERT_EQ(0, res[0].second.size());
+}

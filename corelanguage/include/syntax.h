@@ -328,12 +328,6 @@ public:
 		pEmpty<std::vector<T>> empty;
 		pOr<std::vector<T>> parse_zero_or_more(p, empty);
 		return std::move(parse_zero_or_more(prog));
-		//auto res = p(prog);
-		//if (res.size() == 0)
-		//{
-		//	res.push_back(std::make_pair(result_t::value_type::first_type(), prog));
-		//}
-		//return std::move(res);
 	}
 private:
 	pOneOrMore<T> p;
@@ -377,4 +371,50 @@ public:
 	}
 private:
 	parser<T>& p;
+};
+
+template<typename T1, typename T2>
+class pOneOrMoreWithSpt : public parser<std::vector<T1>>
+{
+public:
+	using parser<std::vector<T1>>::result_t;
+
+	pOneOrMoreWithSpt(parser<T1>& p1, parser<T2>& p2):
+		pct(p1),
+		pspt(p2)
+	{}
+	result_t 
+		operator()(std::vector<token>& prog)override
+	{
+		result_t res;
+		try
+		{
+			auto& res_first = pct(prog);
+
+			{
+				result_t::value_type::first_type tmp;
+				tmp.push_back(res_first.at(0).first);
+				res.push_back(std::make_pair(tmp,res_first[0].second));
+			}
+
+			pThen<T2, T1, T1> parse_more(pspt, pct, [](T2 a, T1 b) {return b; });
+			pZeroOrMore<T1> exec_parse(parse_more);
+			auto& res_second = exec_parse(res_first[0].second);
+
+			for (auto& r : res_second.at(0).first)
+			{
+				res[0].first.push_back(r);
+			}
+			res[0].second = res_second[0].second;
+			return std::move(res);
+		}
+		catch (const std::out_of_range&)
+		{
+			return std::move(res);
+		}
+	}
+
+private:
+	parser<T1>& pct;
+	parser<T2>& pspt;
 };
