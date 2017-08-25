@@ -1,5 +1,6 @@
 #include"lexTest.h"
 #include"parseTest.h"
+#include"exprTest.h"
 
 int main(int argc, char **argv)
 {

@@ -1,6 +1,6 @@
 #include"parse.h"
-
-expr parse(std::vector<token>& programs)
-{
-	return expr();
-}
+//
+//expr parse(std::vector<token>& programs)
+//{
+//	return expr();
+//}

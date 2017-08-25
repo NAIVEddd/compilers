@@ -98,8 +98,8 @@ struct pApplyParseTest : public parseTest
 TEST_F(pApplyParseTest, testpApplyParseInt)
 {
 	init();
-	pVar isVar;
-	pApply<std::string, int> toInt(isVar, [](std::string str) {return stoi(str); });
+	pLit<std::string> is123("123");
+	pApply<std::string, int> toInt(is123, [](std::string str) {return stoi(str); });
 
 	auto res = toInt(codes);
 
@@ -346,7 +346,7 @@ struct pOneOrMoreParseTest : public parseTest
 {
 	void init()
 	{
-		code = "let let let";
+		code = "let let let ;";
 		get();
 	}
 	void init1()
@@ -368,6 +368,7 @@ TEST_F(pOneOrMoreParseTest, testpOneOrMoreParse)
 	ASSERT_EQ(std::string("let"), res[0].first.at(0));
 	ASSERT_EQ(std::string("let"), res[0].first.at(1));
 	ASSERT_EQ(std::string("let"), res[0].first.at(2));
+	ASSERT_EQ(1, res[0].second.size());
 
 	init1();
 

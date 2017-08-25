@@ -160,6 +160,7 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="..\include\exprTest.h" />
     <ClInclude Include="..\include\lexTest.h" />
     <ClInclude Include="..\include\parseTest.h" />
   </ItemGroup>

@@ -1,11 +1,13 @@
 #pragma once
 #include"lex.h"
+#include"expr.h"
 #include<utility>
 #include<vector>
 #include<algorithm>
 #include<functional>
 
-std::vector<std::string> keywords{ "let","letrec","in","case","of","Pack" };
+static std::vector<std::string> keywords{ "let","letrec","in","case","of","Pack" };
+static std::vector<std::string> operators{ "*", "/","+","-","==","~=",">",">=","<","<=","&","|" };
 
 template<typename T>
 class parser
@@ -123,7 +125,7 @@ class pVar : public parser<std::string>
 public:
 	using parser<std::string>::result_t;
 
-	pVar() : isVar([](std::string lhs) {return std::find(keywords.cbegin(), keywords.cend(), lhs) == keywords.cend(); }) {};
+	pVar() : isVar([](std::string lhs) {return std::find(keywords.cbegin(), keywords.cend(), lhs) == keywords.cend() && lhs.size() > 0 && isalpha(lhs[0]); }) {};
 	result_t 
 		operator()(std::vector<token>& prog)override
 	{
@@ -249,7 +251,7 @@ public:
 			auto& res2 = p2(res1.at(0).second);
 			auto& res_second_3 = p3(res2.at(0).second);
 
-			auto& res_first = f(res1[0].first, res2[0].first, res_second_3[0].first);
+			auto res_first = f(res1[0].first, res2[0].first, res_second_3[0].first);
 
 			auto res = result_t();
 			res.push_back(std::make_pair(res_first, res_second_3[0].second));
@@ -345,6 +347,10 @@ public:
 	result_t
 		operator()(std::vector<token>& prog)override
 	{
+		if (prog.size() == 0)
+		{
+			return result_t();
+		}
 		try
 		{
 			auto res_first = p(prog);
@@ -366,7 +372,11 @@ public:
 		}
 		catch (const std::out_of_range&)
 		{
-			return result_t();
+			auto res = result_t();
+			res.push_back(
+				std::make_pair(result_t::value_type::first_type(),
+				prog));
+			return std::move(res);
 		}
 	}
 private:
@@ -417,4 +427,97 @@ public:
 private:
 	parser<T1>& pct;
 	parser<T2>& pspt;
+};
+
+
+class pExpr;
+
+class pAlts : public parser<std::vector<std::shared_ptr<EAlter>>>
+{
+public:
+	using parser<std::vector<std::shared_ptr<EAlter>>>::result_t;
+	result_t
+		operator()(std::vector<token>& prog)override
+	{
+		pAlt alt;
+		pLit<std::string> sliceSym(";");
+		pOneOrMoreWithSpt<std::shared_ptr<EAlter>, std::string> getAlts(alt, sliceSym);
+		return getAlts(prog);
+	}
+
+private:
+	class pAlt : public parser<std::shared_ptr<EAlter>>
+	{
+	public:
+		using parser<std::shared_ptr<EAlter>>::result_t;
+		result_t
+			operator()(std::vector<token>& prog)override;
+	};
+};
+
+class pDefs : public parser<std::vector<std::pair<std::string, std::shared_ptr<expr>>>>
+{
+public:
+	using parser<std::vector<std::pair<std::string, std::shared_ptr<expr>>>>::result_t;
+	result_t
+		operator()(std::vector<token>& prog)override
+	{
+		pLit<std::string> slipeSym(";");
+		pDef def;
+		pOneOrMoreWithSpt<std::pair<std::string, std::shared_ptr<expr>>, std::string>
+			getDefs(def, slipeSym);
+		return getDefs(prog);
+	}
+	
+private:
+	class pDef : public parser<std::pair<std::string, std::shared_ptr<expr>>>
+	{
+	public:
+		using parser<std::pair<std::string, std::shared_ptr<expr>>>::result_t;
+		result_t
+			operator()(std::vector<token>& prog)override;
+	};
+};
+
+class pLambda : public parser<std::shared_ptr<ELam>>
+{
+public:
+	using parser<std::shared_ptr<ELam>>::result_t;
+
+};
+
+class pCase : public parser<std::shared_ptr<ECase>>
+{
+public:
+	using parser<std::shared_ptr<ECase>>::result_t;
+};
+
+class pLet : public parser<std::shared_ptr<ELet>>
+{
+public:
+	using parser<std::shared_ptr<ELet>>::result_t;
+};
+
+class pExpr : public parser<std::shared_ptr<expr>>
+{
+public:
+	using parser<std::shared_ptr<expr>>::result_t;
+	result_t
+		operator()(std::vector<token>& prog)override
+	{
+		return result_t();
+	}
+};
+
+class pScDef : public parser<std::shared_ptr<ScDef>>
+{
+public:
+	using parser<std::shared_ptr<ScDef>>::result_t;
+};
+
+class pProgram : public parser<program>
+{
+public:
+	using parser<program>::result_t;
+
 };

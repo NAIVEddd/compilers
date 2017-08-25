@@ -107,3 +107,29 @@ pThen(parser p1, parser pb, const std::vector<token>& tokens)
 
 	return std::make_pair((res1[0].first, res2[0].first), res2[0].second);
 }*/
+
+pAlts::pAlt::result_t pAlts::pAlt::operator()(std::vector<token>& prog)
+{
+	pLit<std::string> leftB("<");
+	pNum midNum;
+	pLit<std::string> rightB(">");
+	pThen3<std::string, int, std::string, int> parseAltTag(leftB, midNum, rightB, [](std::string, int i, std::string) {return i; });
+
+	pVar var;
+	pZeroOrMore<std::string> vars(var);
+	pLit<std::string> sliSymbol("->");
+	pExpr getExpr;
+	pThen4<int, std::vector<std::string>, std::string, std::shared_ptr<expr>, std::shared_ptr<EAlter>> getAlt(parseAltTag, vars, sliSymbol, getExpr, [](int tag, std::vector<std::string>& params, std::string, std::shared_ptr<expr>& expr) { return std::make_unique<EAlter>(tag, std::move(params), std::move(expr)); });
+
+	return getAlt(prog);
+}
+
+pDefs::pDef::result_t pDefs::pDef::operator()(std::vector<token>& prog)
+{
+	pVar var;
+	pLit<std::string> eqSym("=");
+	pExpr getExpr;
+	pThen3<std::string, std::string, std::shared_ptr<expr>, std::pair<std::string, std::shared_ptr<expr>>>
+		getDef(var, eqSym, getExpr, [](std::string name, std::string, std::shared_ptr<expr>& body)->std::pair<std::string, std::shared_ptr<expr>> {return { name, std::move(body) }; });
+	return getDef(prog);
+}
