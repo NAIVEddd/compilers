@@ -7,7 +7,13 @@
 #include<functional>
 
 static std::vector<std::string> keywords{ "let","letrec","in","case","of","Pack" };
-static std::vector<std::string> operators{ "*", "/","+","-","==","~=",">",">=","<","<=","&","|" };
+static std::vector<std::vector<std::string>> operators{ std::vector<std::string>{ "*" }, 
+														std::vector<std::string>{ "/" },
+														std::vector<std::string>{ "+" },
+														std::vector<std::string>{ "-" },
+														std::vector<std::string>{ "==","/=",">",">=","<","<="},
+														std::vector<std::string>{ "&" },
+														std::vector<std::string>{ "|" } };
 
 template<typename T>
 class parser
@@ -251,7 +257,7 @@ public:
 			auto& res2 = p2(res1.at(0).second);
 			auto& res_second_3 = p3(res2.at(0).second);
 
-			auto res_first = f(res1[0].first, res2[0].first, res_second_3[0].first);
+			auto res_first = f(res1[0].first, res2[0].first, res_second_3.at(0).first);
 
 			auto res = result_t();
 			res.push_back(std::make_pair(res_first, res_second_3[0].second));
@@ -483,19 +489,40 @@ class pLambda : public parser<std::shared_ptr<ELam>>
 {
 public:
 	using parser<std::shared_ptr<ELam>>::result_t;
-
+	result_t
+		operator()(std::vector<token>& prog)override;
 };
 
 class pCase : public parser<std::shared_ptr<ECase>>
 {
 public:
 	using parser<std::shared_ptr<ECase>>::result_t;
+	result_t
+		operator()(std::vector<token>& prog)override;
 };
 
 class pLet : public parser<std::shared_ptr<ELet>>
 {
 public:
 	using parser<std::shared_ptr<ELet>>::result_t;
+	result_t
+		operator()(std::vector<token>& prog)override;
+};
+
+class pAExpr : public parser<std::shared_ptr<expr>>
+{
+public:
+	using parser<std::shared_ptr<expr>>::result_t;
+	result_t
+		operator()(std::vector<token>& prog)override;
+};
+
+class pConstr : public parser<std::shared_ptr<expr>>
+{
+public:
+	using parser<std::shared_ptr<expr>>::result_t;
+	result_t
+		operator()(std::vector<token>& prog)override;
 };
 
 class pExpr : public parser<std::shared_ptr<expr>>

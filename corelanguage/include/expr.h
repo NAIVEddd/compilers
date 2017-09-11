@@ -6,12 +6,15 @@
 class expr
 {
 public:
-	virtual ~expr() = 0;
+	virtual ~expr() = default;
 };
 
 class EVar : public expr
 {
 public:
+	EVar(std::string name):
+		name(std::move(name))
+	{}
 	~EVar() override {}
 
 private:
@@ -21,6 +24,9 @@ private:
 class ENum : public expr
 {
 public:
+	ENum(int num):
+		num(num)
+	{}
 	~ENum() override {}
 
 private:
@@ -30,15 +36,23 @@ private:
 class EConstr : public expr
 {
 public:
+	EConstr(int tag, int arity):
+		tag(tag),
+		arity(arity)
+	{}
 	~EConstr() override {}
 
 private:
-	int num1, num2;
+	int tag, arity;
 };
 
 class EAp : public expr
 {
 public:
+	EAp(std::shared_ptr<expr> left, std::shared_ptr<expr> right):
+		left(std::move(left)),
+		right(std::move(right))
+	{}
 	~EAp() override {}
 
 private:
@@ -49,12 +63,17 @@ private:
 class ELet : public expr
 {
 public:
+	ELet(bool isRec, std::vector<std::pair<std::string, std::shared_ptr<expr>>> defines, std::shared_ptr<expr> exprs) :
+		isRec(isRec),
+		defines(std::move(defines)),
+		exprs(std::move(exprs))
+	{}
 	~ELet() override {}
 
 private:
 	bool isRec;
-	std::vector<std::shared_ptr<expr>> init_;
-	std::shared_ptr<expr> exec;
+	std::vector<std::pair<std::string, std::shared_ptr<expr>>> defines;
+	std::shared_ptr<expr> exprs;
 };
 
 class EAlter
@@ -74,16 +93,24 @@ public:
 class ECase : public expr
 {
 public:
+	ECase(std::shared_ptr<expr> exprs, std::vector<std::shared_ptr<EAlter>> alters):
+		exprs(std::move(exprs)),
+		alters(std::move(alters))
+	{}
 	~ECase() override {}
 
 private:
-	std::shared_ptr<expr> match1;
-	EAlter& other;
+	std::shared_ptr<expr> exprs;
+	std::vector<std::shared_ptr<EAlter>> alters;
 };
 
 class ELam : public expr
 {
 public:
+	ELam(std::vector<std::string> vars, std::shared_ptr<expr>& body):
+		params(std::move(vars)),
+		body(body)
+	{}
 	~ELam() override {}
 
 private:

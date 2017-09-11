@@ -152,6 +152,7 @@
     <ClInclude Include="..\..\..\include\base.h" />
     <ClInclude Include="..\..\..\include\expr.h" />
     <ClInclude Include="..\..\..\include\lex.h" />
+    <ClInclude Include="..\..\..\include\operatorExpr.h" />
     <ClInclude Include="..\..\..\include\parse.h" />
     <ClInclude Include="..\..\..\include\syntax.h" />
     <ClInclude Include="..\..\..\include\util.h" />
@@ -160,6 +161,7 @@
     <ClCompile Include="..\..\..\src\base.cpp" />
     <ClCompile Include="..\..\..\src\expr.cpp" />
     <ClCompile Include="..\..\..\src\lex.cpp" />
+    <ClCompile Include="..\..\..\src\operatorExpr.cpp" />
     <ClCompile Include="..\..\..\src\parse.cpp" />
     <ClCompile Include="..\..\..\src\syntax.cpp" />
     <ClCompile Include="..\..\..\src\util.cpp" />

@@ -133,3 +133,109 @@ pDefs::pDef::result_t pDefs::pDef::operator()(std::vector<token>& prog)
 		getDef(var, eqSym, getExpr, [](std::string name, std::string, std::shared_ptr<expr>& body)->std::pair<std::string, std::shared_ptr<expr>> {return { name, std::move(body) }; });
 	return getDef(prog);
 }
+
+pLambda::result_t pLambda::operator()(std::vector<token>& prog)
+{
+	pLit<std::string> isBackSlish("\\");
+	pVar isVar;
+	pOneOrMore<std::string> getVers(isVar);
+	pLit<std::string> isSlipeSym("->");
+	pExpr getRestExpr;
+	pThen4<std::string, std::vector<std::string>, std::string, std::shared_ptr<expr>, typename result_t::value_type::first_type>
+		parseLambda(isBackSlish,getVers,isSlipeSym,getRestExpr,
+			[](std::string, std::vector<std::string> vars, std::string, std::shared_ptr<expr> body)->result_t::value_type::first_type
+	{
+		return std::make_shared<ELam>(vars, body);
+	});
+	return std::move(parseLambda(prog));
+}
+
+pCase::result_t pCase::operator()(std::vector<token>& prog)
+{
+	pLit<std::string> getCase("case");
+	pExpr getExpr;
+	pLit<std::string> getOf("of");
+	pAlts getAlts;
+	pThen4<std::string, std::shared_ptr<expr>, std::string, std::vector<std::shared_ptr<EAlter>>,std::shared_ptr<ECase>>
+		parseCase(getCase,getExpr,getOf,getAlts,
+			[](std::string, std::shared_ptr<expr>& exprs, std::string, std::vector<std::shared_ptr<EAlter>> alters) -> std::shared_ptr<ECase>
+	{
+		return std::make_shared<ECase>(exprs, alters);
+	});
+	return std::move(parseCase(prog));
+}
+
+pLet::result_t pLet::operator()(std::vector<token>& prog)
+{
+	pLit<std::string> getLet("let");
+	pLit<std::string> getLetRec("letrec");
+	pOr<std::string> letOrletrec(getLet, getLetRec);
+	pDefs getDefs;
+	pLit<std::string> getIn("in");
+	pExpr getExpr;
+	pThen4<std::string, std::vector<std::pair<std::string, std::shared_ptr<expr>>>,std::string,std::shared_ptr<expr>,std::shared_ptr<ELet>>
+		parseLet(letOrletrec,getDefs,getIn,getExpr,
+			[](std::string letletrec, std::vector<std::pair<std::string, std::shared_ptr<expr>>> defines, std::string, std::shared_ptr<expr> exprs)
+	{
+		return std::make_shared<ELet>(letletrec == "letrec", defines, exprs);
+	});
+	return std::move(parseLet(prog));
+}
+
+pAExpr::result_t 
+pAExpr::operator()(std::vector<token>& prog)
+{
+	pVar pvar;
+	pApply<std::string, std::shared_ptr<expr>> first_or(pvar, [](std::string var)
+		{
+			return std::make_shared<EVar>(var);
+		});
+	
+	pNum pnum;
+	pApply<int, std::shared_ptr<expr>> second_or(pnum, [](int num)
+		{
+			return std::make_shared<ENum>(num);
+		});
+
+	pConstr third_or;
+
+	pLit<std::string> lp("(");
+	pLit<std::string> rp(")");
+	pExpr parseExpr;
+	pThen3<std::string, std::shared_ptr<expr>, std::string, std::shared_ptr<expr>>
+		forth_or(lp, parseExpr, rp, [](std::string, std::shared_ptr<expr> res, std::string)
+		{
+			return std::move(res);
+		});
+
+	pOr<std::shared_ptr<expr>>
+		or_tmp1(first_or, second_or);
+	pOr<std::shared_ptr<expr>>
+		or_tmp2(or_tmp1, third_or);
+	pOr<std::shared_ptr<expr>>
+		orExpr(or_tmp2, forth_or);
+
+	return orExpr(prog);
+}
+
+pConstr::result_t 
+pConstr::operator()(std::vector<token>& prog)
+{
+	pLit<std::string> pack("pack");
+	pLit<std::string> lp("{");
+	pNum num;
+	pThen3<std::string, std::string, int, int>
+	getTag(pack, lp, num, [](std::string, std::string, int tag) 
+		{
+			return tag;
+		});
+
+	pLit<std::string> comon(",");
+	pLit<std::string> rp("}");
+	pThen4<int,std::string,int,std::string,std::shared_ptr<expr>>
+	getConstr(getTag, comon, num, rp, [](int tag, std::string, int arity, std::string)
+		{
+			return std::make_shared<EConstr>(tag, arity);
+		});
+	return getConstr(prog);
+}
