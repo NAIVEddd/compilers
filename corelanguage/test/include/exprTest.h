@@ -23,7 +23,7 @@ struct pAltsParseTest : public exprParseTest
 {
 	void init()
 	{
-		code = "<1>hello ->; <2>world ;";
+		code = "<1>hello -> a + b; <2>world -> a - b;";
 		get();
 	}
 };
@@ -55,7 +55,7 @@ struct pECaseParseTest : public exprParseTest
 {
 	void init()
 	{
-		code = R"(case (let y = x in y) of <1> -> 2 ; <2> -> 5)";
+		code = R"(case a + b of <1> -> 2 ; <2> a - b -> 5)";
 		get();
 	}
 };

@@ -485,26 +485,26 @@ private:
 	};
 };
 
-class pLambda : public parser<std::shared_ptr<ELam>>
+class pLambda : public parser<std::shared_ptr<expr>>
 {
 public:
-	using parser<std::shared_ptr<ELam>>::result_t;
+	using parser<std::shared_ptr<expr>>::result_t;
 	result_t
 		operator()(std::vector<token>& prog)override;
 };
 
-class pCase : public parser<std::shared_ptr<ECase>>
+class pCase : public parser<std::shared_ptr<expr>>
 {
 public:
-	using parser<std::shared_ptr<ECase>>::result_t;
+	using parser<std::shared_ptr<expr>>::result_t;
 	result_t
 		operator()(std::vector<token>& prog)override;
 };
 
-class pLet : public parser<std::shared_ptr<ELet>>
+class pLet : public parser<std::shared_ptr<expr>>
 {
 public:
-	using parser<std::shared_ptr<ELet>>::result_t;
+	using parser<std::shared_ptr<expr>>::result_t;
 	result_t
 		operator()(std::vector<token>& prog)override;
 };
@@ -530,10 +530,7 @@ class pExpr : public parser<std::shared_ptr<expr>>
 public:
 	using parser<std::shared_ptr<expr>>::result_t;
 	result_t
-		operator()(std::vector<token>& prog)override
-	{
-		return result_t();
-	}
+		operator()(std::vector<token>& prog)override;
 };
 
 class pScDef : public parser<std::shared_ptr<ScDef>>

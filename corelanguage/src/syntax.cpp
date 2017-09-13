@@ -1,112 +1,8 @@
 #include"base.h"
 #include"syntax.h"
+#include"operatorExpr.h"
 #include<algorithm>
 #include<functional>
-using prd = std::function<bool(token)>;
-using tokens_list = std::vector<std::pair<std::string, std::vector<token>>>;
-
-
-
-//tokens_list
-//pSat(const std::vector<token>& tokens, prd func)
-//{
-//	tokens_list result;
-//	if (tokens.size() == 0)
-//	{
-//		return result;
-//	}
-//	if (func(tokens[0]))
-//	{
-//		result.push_back(std::pair<std::string, std::vector<token>>{ tokens[0].name, std::vector<token>(++tokens.begin(), tokens.end()) });
-//		return result;
-//	}
-//	else
-//	{
-//		return result;
-//	}
-//}
-
-//tokens_list
-//pLit(const std::vector<token>& tokens, std::string name)
-//{
-//	return pSat(tokens, [&name](token tok)->bool {return name == tok.name; });
-//}
-
-//using patten = std::function<tokens_list(const std::vector<token>&, prd)>;
-//template<typename out, typename in>
-//class transFunc
-//{
-//public:
-//	transFunc(std::function<out(in)> func_) :func(func_) {};
-//	out operator()(in para) { return func(para); }
-//
-//	std::function<out(in)> func;
-//};
-
-//template<typename out, typename in>
-//std::vector<std::pair<out, std::vector<token>>>
-//pApply(const std::vector<token>& tokens, patten p, prd prdFunc, transFunc<out,in> trans)
-//{
-//	std::vector<std::pair<out, std::vector<token>>> result;
-//	auto list = p(tokens, prdFunc);
-//	if (list.size() != 0)
-//	{
-//		auto newfst = trans(list[0].first);
-//		result.push_back({ newfst,list[0].second });
-//	}
-//	return result;
-//}
-
-//tokens_list
-//pVar(const std::vector<token>& tokens)
-//{
-//	const auto & keywordList = keywords;
-//	prd isVar = [& keywordList](const token& tok) { return std::find(keywordList.cbegin(), keywordList.cend(), tok.name) == keywordList.cend(); };
-//	return pSat(tokens, isVar);
-//}
-
-//std::vector<std::pair<uint32_t, std::vector<token>>>
-//pNum(const std::vector<token>& tokens)
-//{
-//	prd isNum = [](const token& tok) { return std::all_of(tok.name.begin(), tok.name.end(), isdigit); };
-//	transFunc<uint32_t, std::string> toInt([](std::string str) { return (uint32_t)std::stol(str); });
-//	return pApply(tokens,
-//		pSat,
-//		isNum,
-//		toInt);
-//}
-
-//template<typename result_type, typename parser>
-//result_type
-//pOr(parser p1, parser p2, const std::vector<token>& tokens)
-//{
-//	auto res1 = p1(tokens);
-//	auto res2 = p2(tokens);
-//	if (!res1.size())
-//	{
-//		return res2;
-//	}
-//	else if (!res2.size())
-//	{
-//		return res1;
-//	}
-//
-//	for (auto& tok : res2)
-//	{
-//		res1.push_back(tok);
-//	}
-//	return res1;
-//}
-
-/*template<typename result_type, typename parser>
-result_type
-pThen(parser p1, parser pb, const std::vector<token>& tokens)
-{
-	auto res1 = p1(tokens);
-	auto res2 = p1(res1[0].second);
-
-	return std::make_pair((res1[0].first, res2[0].first), res2[0].second);
-}*/
 
 pAlts::pAlt::result_t pAlts::pAlt::operator()(std::vector<token>& prog)
 {
@@ -156,9 +52,9 @@ pCase::result_t pCase::operator()(std::vector<token>& prog)
 	pExpr getExpr;
 	pLit<std::string> getOf("of");
 	pAlts getAlts;
-	pThen4<std::string, std::shared_ptr<expr>, std::string, std::vector<std::shared_ptr<EAlter>>,std::shared_ptr<ECase>>
+	pThen4<std::string, std::shared_ptr<expr>, std::string, std::vector<std::shared_ptr<EAlter>>,std::shared_ptr<expr>>
 		parseCase(getCase,getExpr,getOf,getAlts,
-			[](std::string, std::shared_ptr<expr>& exprs, std::string, std::vector<std::shared_ptr<EAlter>> alters) -> std::shared_ptr<ECase>
+			[](std::string, std::shared_ptr<expr>& exprs, std::string, std::vector<std::shared_ptr<EAlter>> alters) -> std::shared_ptr<expr>
 	{
 		return std::make_shared<ECase>(exprs, alters);
 	});
@@ -173,7 +69,7 @@ pLet::result_t pLet::operator()(std::vector<token>& prog)
 	pDefs getDefs;
 	pLit<std::string> getIn("in");
 	pExpr getExpr;
-	pThen4<std::string, std::vector<std::pair<std::string, std::shared_ptr<expr>>>,std::string,std::shared_ptr<expr>,std::shared_ptr<ELet>>
+	pThen4<std::string, std::vector<std::pair<std::string, std::shared_ptr<expr>>>,std::string,std::shared_ptr<expr>,std::shared_ptr<expr>>
 		parseLet(letOrletrec,getDefs,getIn,getExpr,
 			[](std::string letletrec, std::vector<std::pair<std::string, std::shared_ptr<expr>>> defines, std::string, std::shared_ptr<expr> exprs)
 	{
@@ -238,4 +134,19 @@ pConstr::operator()(std::vector<token>& prog)
 			return std::make_shared<EConstr>(tag, arity);
 		});
 	return getConstr(prog);
+}
+
+pExpr::result_t 
+pExpr::operator()(std::vector<token>& prog)
+{
+	pLet getLet;
+	pCase getCase;
+	pLambda getLambda;
+	pExpr_p1 p1;
+
+	pOr<std::shared_ptr<expr>> tmp1(getLet, getCase);
+	pOr<std::shared_ptr<expr>> tmp2(tmp1, getLambda);
+	pOr<std::shared_ptr<expr>> getExpr(tmp2, p1);
+
+	return getExpr(prog);
 }
