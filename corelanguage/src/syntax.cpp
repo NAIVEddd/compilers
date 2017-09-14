@@ -150,3 +150,32 @@ pExpr::operator()(std::vector<token>& prog)
 
 	return getExpr(prog);
 }
+
+pScDef::result_t 
+pScDef::operator()(std::vector<token>& prog)
+{
+	pVar getVariable;
+	pZeroOrMore<std::string> getVars(getVariable);
+	pLit<std::string> getEq("=");
+	pExpr getExpr;
+	pThen4<std::string,std::vector<std::string>,std::string,std::shared_ptr<expr>, std::shared_ptr<ScDef>>
+		getScDef(getVariable, getVars, getEq, getExpr, [](std::string, std::vector<std::string>, std::string, std::shared_ptr<expr>)
+			{
+				return std::make_shared<ScDef>();
+			});
+	return getScDef(prog);
+}
+
+pProgram::result_t 
+pProgram::operator()(std::vector<token>& prog)
+{
+	pScDef getScDef;
+	pLit<std::string> getComma(";");
+	pOneOrMoreWithSpt<std::shared_ptr<ScDef>, std::string>
+		getProgram(getScDef, getComma);
+	auto res_second = getProgram(prog);
+	program res_first(std::move(res_second[0].first));
+	auto res = result_t();
+	res.push_back(std::make_pair(std::move(res_first), std::move(res_second[0].second)));
+	return std::move(res);
+}

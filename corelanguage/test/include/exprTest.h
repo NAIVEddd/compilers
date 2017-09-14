@@ -26,6 +26,12 @@ struct pAltsParseTest : public exprParseTest
 		code = "<1>hello -> a + b; <2>world -> a - b;";
 		get();
 	}
+
+	void init1()
+	{
+		code = "<1>hello -> a + b; \\ a b c -> lam;";
+		get();
+	}
 };
 TEST_F(pAltsParseTest, pAltsParseIsString)
 {
@@ -33,7 +39,8 @@ TEST_F(pAltsParseTest, pAltsParseIsString)
 	pAlts getAlts;
 	auto res = getAlts(codes);
 	
-
+	init1();
+	res = getAlts(codes);
 }
 
 struct pELambdaParseTest : public exprParseTest
@@ -110,11 +117,6 @@ TEST_F(pFoundOpParseTest, pECaseParse)
 {
 	pExpr_p1 p1;
 
-	auto x = std::make_shared<EVar>("x");
-	auto plusExpr = std::make_shared<FoundOp>("+", x);
-	auto y = std::make_shared<EVar>("y");
-	auto res = combineOp(y, plusExpr);
-
 	init1();
 	auto ress = p1(codes);
 
@@ -143,4 +145,36 @@ TEST_F(pEConstrParseTest, pECaseParse)
 	auto ptr = *(std::dynamic_pointer_cast<EConstr>(res.at(0).first));
 	ASSERT_EQ(1,res.size());
 	ASSERT_EQ(0, res.at(0).second.size());
+}
+
+struct pScDecParseTest : public exprParseTest
+{
+	void init()
+	{
+		code = R"(pack { 1, 2 })";
+		get();
+	}
+};
+TEST_F(pScDecParseTest, pECaseParse)
+{
+	init();
+	pScDef getScDef;
+	auto res = getScDef(codes);
+
+}
+
+struct pProgramParseTest : public exprParseTest
+{
+	void init()
+	{
+		code = R"(pack { 1, 2 })";
+		get();
+	}
+};
+TEST_F(pProgramParseTest, pECaseParse)
+{
+	init();
+	pProgram getProgram;
+	auto res = getProgram(codes);
+
 }

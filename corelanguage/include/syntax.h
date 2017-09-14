@@ -537,11 +537,14 @@ class pScDef : public parser<std::shared_ptr<ScDef>>
 {
 public:
 	using parser<std::shared_ptr<ScDef>>::result_t;
+	result_t
+		operator()(std::vector<token>& prog)override;
 };
 
 class pProgram : public parser<program>
 {
 public:
 	using parser<program>::result_t;
-
+	result_t
+		operator()(std::vector<token>& prog)override;
 };

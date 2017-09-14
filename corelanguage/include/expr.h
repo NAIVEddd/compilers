@@ -129,5 +129,8 @@ public:
 class program
 {
 public:
-	std::vector<ScDef> defs;
+	program(std::vector<std::shared_ptr<ScDef>> defs):
+		defs(std::move(defs))
+	{}
+	std::vector<std::shared_ptr<ScDef>> defs;
 };
