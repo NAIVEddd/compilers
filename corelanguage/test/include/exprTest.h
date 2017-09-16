@@ -23,13 +23,13 @@ struct pAltsParseTest : public exprParseTest
 {
 	void init()
 	{
-		code = "<1>hello -> a + b; <2>world -> a - b;";
+		code = "<1>hello -> a + b; <2>world -> a - b";
 		get();
 	}
 
 	void init1()
 	{
-		code = "<1>hello -> a + b; \\ a b c -> lam;";
+		code = "<1>hello -> a + b; \\ a b c -> lam";
 		get();
 	}
 };
@@ -38,9 +38,15 @@ TEST_F(pAltsParseTest, pAltsParseIsString)
 	init();
 	pAlts getAlts;
 	auto res = getAlts(codes);
+
+	ASSERT_EQ(1, res.size());
+	ASSERT_EQ(2, res[0].first.size());
 	
 	init1();
 	res = getAlts(codes);
+
+	ASSERT_EQ(1, res.size());
+	ASSERT_EQ(1, res[0].first.size());
 }
 
 struct pELambdaParseTest : public exprParseTest
@@ -56,6 +62,8 @@ TEST_F(pELambdaParseTest, pELambdaParse)
 	init();
 	pLambda getLambda;
 	auto res = getLambda(codes);
+
+	ASSERT_EQ(1, res.size());
 }
 
 struct pECaseParseTest : public exprParseTest
@@ -71,6 +79,9 @@ TEST_F(pECaseParseTest, pECaseParse)
 	init();
 	pCase getCase;
 	auto res = getCase(codes);
+
+	ASSERT_EQ(1, res.size());
+	ASSERT_EQ(9, res[0].second.size());
 }
 
 struct pELetParseTest : public exprParseTest
@@ -86,6 +97,9 @@ TEST_F(pELetParseTest, pECaseParse)
 	init();
 	pLet getLet;
 	auto res = getLet(codes);
+
+	ASSERT_EQ(1, res.size());
+	ASSERT_EQ(0, res[0].second.size());
 }
 
 struct pFoundOpParseTest : public exprParseTest
@@ -151,7 +165,7 @@ struct pScDecParseTest : public exprParseTest
 {
 	void init()
 	{
-		code = R"(pack { 1, 2 })";
+		code = R"(a = x + y)";
 		get();
 	}
 };
@@ -161,13 +175,14 @@ TEST_F(pScDecParseTest, pECaseParse)
 	pScDef getScDef;
 	auto res = getScDef(codes);
 
+	ASSERT_EQ(1, res.size());
 }
 
 struct pProgramParseTest : public exprParseTest
 {
 	void init()
 	{
-		code = R"(pack { 1, 2 })";
+		code = R"(a c d = x + y; b c d = c + d)";
 		get();
 	}
 };
@@ -177,4 +192,7 @@ TEST_F(pProgramParseTest, pECaseParse)
 	pProgram getProgram;
 	auto res = getProgram(codes);
 
+	ASSERT_EQ(1, res.size());
+	ASSERT_EQ(2, res[0].first.defs.size());
+	ASSERT_EQ(0, res[0].second.size());
 }

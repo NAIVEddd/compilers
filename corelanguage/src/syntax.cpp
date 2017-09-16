@@ -159,9 +159,9 @@ pScDef::operator()(std::vector<token>& prog)
 	pLit<std::string> getEq("=");
 	pExpr getExpr;
 	pThen4<std::string,std::vector<std::string>,std::string,std::shared_ptr<expr>, std::shared_ptr<ScDef>>
-		getScDef(getVariable, getVars, getEq, getExpr, [](std::string, std::vector<std::string>, std::string, std::shared_ptr<expr>)
+		getScDef(getVariable, getVars, getEq, getExpr, [](std::string name, std::vector<std::string> params, std::string, std::shared_ptr<expr> body)
 			{
-				return std::make_shared<ScDef>();
+				return std::make_shared<ScDef>(std::move(name), std::move(params), std::move(body));
 			});
 	return getScDef(prog);
 }
@@ -173,9 +173,16 @@ pProgram::operator()(std::vector<token>& prog)
 	pLit<std::string> getComma(";");
 	pOneOrMoreWithSpt<std::shared_ptr<ScDef>, std::string>
 		getProgram(getScDef, getComma);
-	auto res_second = getProgram(prog);
-	program res_first(std::move(res_second[0].first));
-	auto res = result_t();
-	res.push_back(std::make_pair(std::move(res_first), std::move(res_second[0].second)));
-	return std::move(res);
+	try
+	{
+		auto res_second = getProgram(prog);
+		program res_first(std::move(res_second[0].first));
+		auto res = result_t();
+		res.push_back(std::make_pair(std::move(res_first), std::move(res_second[0].second)));
+		return std::move(res);
+	}
+	catch (const std::exception&)
+	{
+		return result_t();
+	}
 }

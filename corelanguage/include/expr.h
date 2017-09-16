@@ -121,6 +121,11 @@ private:
 class ScDef
 {
 public:
+	ScDef(std::string name, std::vector<std::string> params, std::shared_ptr<expr> body):
+		name(std::move(name)),
+		params(std::move(params)),
+		body(std::move(body))
+	{}
 	std::string name;
 	std::vector<std::string> params;
 	std::shared_ptr<expr> body;
