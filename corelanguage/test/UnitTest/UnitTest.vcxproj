@@ -163,6 +163,7 @@
     <ClInclude Include="..\include\exprTest.h" />
     <ClInclude Include="..\include\lexTest.h" />
     <ClInclude Include="..\include\parseTest.h" />
+    <ClInclude Include="..\include\templateInstantiationTest.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
