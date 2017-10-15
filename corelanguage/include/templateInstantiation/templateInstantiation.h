@@ -6,6 +6,7 @@
 #include<string>
 #include<vector>
 #include<map>
+#include<list>
 
 class TiState;
 
@@ -18,7 +19,8 @@ using Addr = uint32_t;
 
 struct Node
 {
-	~Node() = 0;
+	virtual ~Node() = 0;
+	virtual TiState& Step(TiState& state) = 0;
 };
 
 class TiState
@@ -31,13 +33,6 @@ public:
 	class TiState::TiHeap
 	{
 	public:
-		std::vector<Addr> addrs1;
-		std::vector<Addr> addrs2;
-		std::map<Addr, std::pair<std::shared_ptr<Node>, std::string>> programs;
-		int allocTimes;
-		int b;
-		int c;
-
 		TiHeap();
 		TiHeap& Init();
 		Addr Alloc(std::shared_ptr<ScDef>& node);
@@ -45,16 +40,24 @@ public:
 		TiHeap& Update(Addr addr, std::shared_ptr<Node>& newNode);
 		TiHeap& Free(Addr addr);
 		std::shared_ptr<Node> LookUp(Addr addr);
-		std::vector<Addr> Address() const;
+		const std::list<Addr>& Address() const;
 		size_t Size() const;
 		int GetAllocTimes() const;
+		int GetUpdateTimes() const;
 		int GetFreeTimes() const;
-
+		
+	private:
+		std::vector<Addr> addrs1;
+		std::list<Addr> addrs2;
+		std::map<Addr, std::pair<std::shared_ptr<Node>, std::string>> programs;
+		int allocTimes;
+		int updateTimes;
+		int freeTimes;
 	};
 	class TiState::TiStats
 	{
 	public:
-
+		int i = 0;
 	};
 
 
@@ -77,28 +80,43 @@ public:
 class NAp : public Node
 {
 public:
+	NAp(Addr l, Addr r) :left(l), right(r) {}
+	TiState& Step(TiState& state) override;
+
 	Addr left;
 	Addr right;
 };
 
-template<typename T>
 class NSC : public Node
 {
 public:
+	NSC(std::string name, std::vector<std::string> params, std::shared_ptr<expr>& body)
+		: name(std::move(name))
+		, params(std::move(params))
+		, body(body)
+	{}
+	TiState& Step(TiState& state) override;
+
 	std::string name;
-	std::vector<T> params;
-	expr body;
+	std::vector<std::string> params;
+	std::shared_ptr<expr> body;
 };
 
 class NNum : public Node
 {
 public:
+	NNum(int num) :num(num) {}
+	TiState& Step(TiState& state) override;
+
 	int num;
 };
 
 class NInd : public Node
 {
 public:
+	NInd(Addr addr) :addr(addr) {}
+	TiState& Step(TiState& state) override;
+	
 	Addr addr;
 };
 
@@ -117,6 +135,8 @@ public:
 		:name(std::move(name))
 		,prim(prim)
 	{}
+	TiState& Step(TiState& state) override;
+
 	std::string name;
 	Primitive prim;
 };
