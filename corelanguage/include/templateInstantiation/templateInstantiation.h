@@ -26,7 +26,7 @@ struct Node
 class TiState
 {
 public:
-	using TiStack = std::vector<Addr>;
+	using TiStack = std::list<Addr>;
 	using TiDump = std::vector<TiStack>;
 	using TiGlobal = std::map<std::string, Addr>;
 
@@ -34,7 +34,7 @@ public:
 	{
 	public:
 		TiHeap();
-		TiHeap& Init();
+		TiHeap& Init();		// obtain the 'main' function's addr
 		Addr Alloc(std::shared_ptr<ScDef>& node);
 		Addr Alloc(NPrim& node);
 		TiHeap& Update(Addr addr, std::shared_ptr<Node>& newNode);

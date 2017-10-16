@@ -109,7 +109,7 @@ bool tiFinalState(TiState& state)
 	{
 		throw "empty stack.";
 	}
-	auto addr = state.GetStack()[0];
+	auto addr = state.GetStack().front();
 	if (state.GetDump().size() == 0 && isDataNode(state.GetHeap().LookUp(addr)))
 	{
 		return true;
@@ -125,7 +125,7 @@ TiState& doAdmin(TiState& state)
 
 TiState advanceState(TiState& state)
 {
-	auto addr = state.GetStack()[0];
+	auto addr = state.GetStack().front();
 	return state.GetHeap().LookUp(addr)->Step(state);
 }
 
@@ -254,4 +254,77 @@ TiState::TiHeap & TiState::GetHeap()
 TiState::TiStats & TiState::GetStats()
 {
 	return m_stats;
+}
+
+TiState & NAp::Step(TiState & state)
+{
+	auto& stack = state.GetStack();
+	auto& heap = state.GetHeap();
+	try
+	{
+		auto& ptr = heap.LookUp(right);
+		auto nind_ptr = std::dynamic_pointer_cast<NInd>(ptr);
+		auto new_right = nind_ptr->addr;
+		auto new_node = std::make_shared<NAp>(left, new_right);
+		heap.Update(stack.back(), std::dynamic_pointer_cast<Node>(new_node));
+	}
+	catch (...)
+	{
+		;
+	}
+	stack.push_back(left);
+	return state;
+}
+
+/// NSC helper functions.
+std::pair<TiState::TiStack, TiState::TiGlobal>
+getArgs(NSC& sc, TiState::TiStack stack, TiState::TiHeap& heap)
+{
+	TiState::TiGlobal res_global;
+	for (auto& arg : sc.params)
+	{
+		if (stack.size() == 0)
+		{
+			throw sc.name + " is applied to too few arguments";
+		}
+		auto addr = stack.front();
+		stack.pop_front();
+		auto& tmp = heap.LookUp(addr);
+		try
+		{
+			auto nap = std::dynamic_pointer_cast<NAp>(tmp);
+			res_global.insert(std::make_pair(arg, nap->right));
+		}
+		catch (...)
+		{
+			throw std::to_string(addr) + " : this address is not NAp node.";
+		}
+	}
+	return std::make_pair(stack, res_global);
+}
+
+Addr
+getSCAddr(size_t len, TiState::TiStack& stack)
+{
+	for (auto addr : stack)
+	{
+		if (len-- == 0)
+		{
+			return addr;
+		}
+	}
+	return -1;
+}
+
+TiState&
+instantiateAndUpdate(NSC& sc, Addr scAddr, TiState& state)
+{
+
+	return state;
+}
+
+TiState & NSC::Step(TiState & state)
+{
+	
+	return state;
 }
