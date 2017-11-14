@@ -9,6 +9,7 @@
 #include<list>
 
 class TiState;
+class NPrim;
 
 std::string run(std::string& sourceCode);
 TiState compile(std::shared_ptr<program>& prog);
@@ -30,7 +31,7 @@ public:
 	using TiDump = std::vector<TiStack>;
 	using TiGlobal = std::map<std::string, Addr>;
 
-	class TiState::TiHeap
+	class TiHeap
 	{
 	public:
 		TiHeap();
@@ -45,7 +46,7 @@ public:
 		int GetAllocTimes() const;
 		int GetUpdateTimes() const;
 		int GetFreeTimes() const;
-		
+
 	private:
 		std::vector<Addr> addrs1;
 		std::list<Addr> addrs2;
@@ -54,7 +55,7 @@ public:
 		int updateTimes;
 		int freeTimes;
 	};
-	class TiState::TiStats
+	class TiStats
 	{
 	public:
 		int i = 0;
@@ -70,6 +71,7 @@ public:
 	TiHeap& GetHeap();
 	TiStats& GetStats();
 
+private:
 	TiStack m_stack;
 	TiDump m_dump;
 	TiGlobal m_global;
@@ -116,7 +118,7 @@ class NInd : public Node
 public:
 	NInd(Addr addr) :addr(addr) {}
 	TiState& Step(TiState& state) override;
-	
+
 	Addr addr;
 };
 
@@ -132,8 +134,8 @@ class NPrim : public Node
 {
 public:
 	NPrim(std::string name, Primitive prim)
-		:name(std::move(name))
-		,prim(prim)
+		: name(std::move(name))
+		, prim(prim)
 	{}
 	TiState& Step(TiState& state) override;
 

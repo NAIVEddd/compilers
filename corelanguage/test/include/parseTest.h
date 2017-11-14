@@ -1,6 +1,5 @@
 #pragma once
 #include"lex.h"
-#include"parse.h"
 #include"syntax.h"
 #include<algorithm>
 #include<cctype>
