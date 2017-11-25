@@ -21,7 +21,7 @@ using Addr = uint32_t;
 struct Node
 {
 	virtual ~Node() = 0;
-	virtual TiState& Step(TiState& state) = 0;
+	virtual TiState& Advance(TiState& state) = 0;
 };
 
 class TiState
@@ -83,7 +83,7 @@ class NAp : public Node
 {
 public:
 	NAp(Addr l, Addr r) :left(l), right(r) {}
-	TiState& Step(TiState& state) override;
+	TiState& Advance(TiState& state) override;
 
 	Addr left;
 	Addr right;
@@ -97,7 +97,7 @@ public:
 		, params(std::move(params))
 		, body(body)
 	{}
-	TiState& Step(TiState& state) override;
+	TiState& Advance(TiState& state) override;
 
 	std::string name;
 	std::vector<std::string> params;
@@ -108,7 +108,7 @@ class NNum : public Node
 {
 public:
 	NNum(int num) :num(num) {}
-	TiState& Step(TiState& state) override;
+	TiState& Advance(TiState& state) override;
 
 	int num;
 };
@@ -117,7 +117,7 @@ class NInd : public Node
 {
 public:
 	NInd(Addr addr) :addr(addr) {}
-	TiState& Step(TiState& state) override;
+	TiState& Advance(TiState& state) override;
 
 	Addr addr;
 };
@@ -137,7 +137,7 @@ public:
 		: name(std::move(name))
 		, prim(prim)
 	{}
-	TiState& Step(TiState& state) override;
+	TiState& Advance(TiState& state) override;
 
 	std::string name;
 	Primitive prim;

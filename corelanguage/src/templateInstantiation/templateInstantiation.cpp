@@ -3,7 +3,8 @@
 #include<memory>
 #include<functional>
 
-std::vector<NPrim>& getPrDefs()
+std::vector<NPrim>&
+getPrDefs()
 {
 	static std::vector<NPrim> prDefs;
 	if (prDefs.size() == 0)
@@ -17,10 +18,10 @@ std::vector<NPrim>& getPrDefs()
 	return prDefs;
 }
 
-std::pair<TiState::TiHeap, TiState::TiGlobal> 
-	mapAccuml(std::function<std::pair<TiState::TiHeap,TiState::TiGlobal>(TiState::TiHeap, std::shared_ptr<ScDef>&)> f, 
-		TiState::TiHeap& initHeap, 
-		std::shared_ptr<program>& prog)
+std::pair<TiState::TiHeap, TiState::TiGlobal>
+mapAccuml(std::function<std::pair<TiState::TiHeap, TiState::TiGlobal>(TiState::TiHeap, std::shared_ptr<ScDef>&)> f,
+	TiState::TiHeap& initHeap,
+	std::shared_ptr<program>& prog)
 {
 	TiState::TiGlobal res_global;
 	TiState::TiHeap res_heap = initHeap;
@@ -49,7 +50,8 @@ mapAccuml(std::function<std::pair<TiState::TiHeap, TiState::TiGlobal>(TiState::T
 	return std::make_pair(res_heap, res_global);
 }
 
-std::pair<TiState::TiHeap, TiState::TiGlobal> buildInitialHeap(std::shared_ptr<program>& prog)
+std::pair<TiState::TiHeap, TiState::TiGlobal>
+buildInitialHeap(std::shared_ptr<program>& prog)
 {
 	auto allocateSc = [](TiState::TiHeap heap, std::shared_ptr<ScDef>& def)
 	{
@@ -76,12 +78,14 @@ std::pair<TiState::TiHeap, TiState::TiGlobal> buildInitialHeap(std::shared_ptr<p
 	return std::move(std::make_pair(tmp_res2.first, tmp_res.second));
 }
 
-std::string run(std::string & sourceCode)
+std::string
+run(std::string & sourceCode)
 {
 	return std::string();
 }
 
-TiState compile(std::shared_ptr<program> & prog)
+TiState
+compile(std::shared_ptr<program> & prog)
 {
 	TiState res;
 	auto heap_global = buildInitialHeap(prog);
@@ -90,7 +94,8 @@ TiState compile(std::shared_ptr<program> & prog)
 	return res.Init();
 }
 
-bool isDataNode(std::shared_ptr<Node>& node)
+bool
+isDataNode(std::shared_ptr<Node>& node)
 {
 	try
 	{
@@ -103,7 +108,8 @@ bool isDataNode(std::shared_ptr<Node>& node)
 	}
 }
 
-bool tiFinalState(TiState& state)
+bool
+tiFinalState(TiState& state)
 {
 	if (state.GetStack().size() == 0)
 	{
@@ -118,18 +124,21 @@ bool tiFinalState(TiState& state)
 }
 
 // do the administration work between steps
-TiState& doAdmin(TiState& state)
+TiState&
+doAdmin(TiState& state)
 {
 	return state;
 }
 
-TiState advanceState(TiState& state)
+TiState
+advanceState(TiState& state)
 {
 	auto addr = state.GetStack().front();
-	return state.GetHeap().LookUp(addr)->Step(state);
+	return state.GetHeap().LookUp(addr)->Advance(state);
 }
 
-std::vector<TiState> eval(TiState & initState)
+std::vector<TiState>
+eval(TiState & initState)
 {
 	std::vector<TiState> result;
 	result.push_back(initState);
@@ -146,7 +155,8 @@ std::vector<TiState> eval(TiState & initState)
 	return result;
 }
 
-std::string showResult(std::vector<TiState>& theResult)
+std::string
+showResult(std::vector<TiState>& theResult)
 {
 	return std::string();
 }
@@ -159,7 +169,8 @@ TiState::TiHeap::TiHeap()
 	addrs1.push_back(1);
 }
 
-Addr TiState::TiHeap::Alloc(std::shared_ptr<ScDef>& node)
+Addr
+TiState::TiHeap::Alloc(std::shared_ptr<ScDef>& node)
 {
 	auto addr = addrs1[0]++;
 	addrs2.push_back(addr);
@@ -168,7 +179,8 @@ Addr TiState::TiHeap::Alloc(std::shared_ptr<ScDef>& node)
 	return addr;
 }
 
-Addr TiState::TiHeap::Alloc(NPrim & node)
+Addr
+TiState::TiHeap::Alloc(NPrim & node)
 {
 	auto addr = addrs1[0]++;
 	addrs2.push_back(addr);
@@ -177,46 +189,54 @@ Addr TiState::TiHeap::Alloc(NPrim & node)
 	return addr;
 }
 
-TiState::TiHeap & TiState::TiHeap::Update(Addr addr, std::shared_ptr<Node>& newNode)
+TiState::TiHeap &
+TiState::TiHeap::Update(Addr addr, std::shared_ptr<Node>& newNode)
 {
 	programs.at(addr) = std::make_pair(newNode, std::string());
 	++updateTimes;
 	return *this;
 }
 
-TiState::TiHeap & TiState::TiHeap::Free(Addr addr)
+TiState::TiHeap &
+TiState::TiHeap::Free(Addr addr)
 {
 	addrs2.remove_if([&addr](Addr& tar) {return tar == addr; });
 	++freeTimes;
 	return *this;
 }
 
-std::shared_ptr<Node> TiState::TiHeap::LookUp(Addr addr)
+std::shared_ptr<Node>
+TiState::TiHeap::LookUp(Addr addr)
 {
 	return programs.at(addr).first;
 }
 
-const std::list<Addr>& TiState::TiHeap::Address() const
+const std::list<Addr>&
+TiState::TiHeap::Address() const
 {
 	return addrs2;
 }
 
-size_t TiState::TiHeap::Size() const
+size_t
+TiState::TiHeap::Size() const
 {
 	return programs.size();
 }
 
-int TiState::TiHeap::GetAllocTimes() const
+int
+TiState::TiHeap::GetAllocTimes() const
 {
 	return allocTimes;
 }
 
-int TiState::TiHeap::GetUpdateTimes() const
+int
+TiState::TiHeap::GetUpdateTimes() const
 {
 	return updateTimes;
 }
 
-int TiState::TiHeap::GetFreeTimes() const
+int
+TiState::TiHeap::GetFreeTimes() const
 {
 	return freeTimes;
 }
@@ -225,38 +245,45 @@ TiState::TiState()
 {
 }
 
-TiState & TiState::Init()
+TiState &
+TiState::Init()
 {
 	m_stack.push_back(m_global.at("main"));
 	return *this;
 }
 
-TiState::TiStack & TiState::GetStack()
+TiState::TiStack &
+TiState::GetStack()
 {
 	return m_stack;
 }
 
-TiState::TiDump & TiState::GetDump()
+TiState::TiDump &
+TiState::GetDump()
 {
 	return m_dump;
 }
 
-TiState::TiGlobal & TiState::GetGlobal()
+TiState::TiGlobal &
+TiState::GetGlobal()
 {
 	return m_global;
 }
 
-TiState::TiHeap & TiState::GetHeap()
+TiState::TiHeap &
+TiState::GetHeap()
 {
 	return m_heap;
 }
 
-TiState::TiStats & TiState::GetStats()
+TiState::TiStats &
+TiState::GetStats()
 {
 	return m_stats;
 }
 
-TiState & NAp::Step(TiState & state)
+TiState &
+NAp::Advance(TiState & state)
 {
 	auto& stack = state.GetStack();
 	auto& heap = state.GetHeap();
@@ -323,8 +350,9 @@ instantiateAndUpdate(NSC& sc, Addr scAddr, TiState& state)
 	return state;
 }
 
-TiState & NSC::Step(TiState & state)
+TiState &
+NSC::Advance(TiState & state)
 {
-	
+
 	return state;
 }
