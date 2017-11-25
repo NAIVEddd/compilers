@@ -3,19 +3,25 @@
 #include<vector>
 #include<memory>
 
+class TiState;
+using Addr = uint32_t;
 class expr
 {
 public:
 	virtual ~expr() = default;
+	virtual void Instantiate(TiState& state) = 0;
+	virtual void InstantiateAndUpdate(TiState& state, Addr addr) = 0;
 };
 
 class EVar : public expr
 {
 public:
-	EVar(std::string name):
+	EVar(std::string name) :
 		name(std::move(name))
 	{}
 	~EVar() override {}
+	virtual void Instantiate(TiState& state) override;
+	virtual void InstantiateAndUpdate(TiState& state, Addr addr) override;
 
 private:
 	std::string name;
@@ -24,10 +30,12 @@ private:
 class ENum : public expr
 {
 public:
-	ENum(int num):
+	ENum(int num) :
 		num(num)
 	{}
 	~ENum() override {}
+	virtual void Instantiate(TiState& state) override;
+	virtual void InstantiateAndUpdate(TiState& state, Addr addr) override;
 
 private:
 	int num;
@@ -36,11 +44,13 @@ private:
 class EConstr : public expr
 {
 public:
-	EConstr(int tag, int arity):
+	EConstr(int tag, int arity) :
 		tag(tag),
 		arity(arity)
 	{}
 	~EConstr() override {}
+	virtual void Instantiate(TiState& state) override;
+	virtual void InstantiateAndUpdate(TiState& state, Addr addr) override;
 
 private:
 	int tag, arity;
@@ -49,11 +59,13 @@ private:
 class EAp : public expr
 {
 public:
-	EAp(std::shared_ptr<expr> left, std::shared_ptr<expr> right):
+	EAp(std::shared_ptr<expr> left, std::shared_ptr<expr> right) :
 		left(std::move(left)),
 		right(std::move(right))
 	{}
 	~EAp() override {}
+	virtual void Instantiate(TiState& state) override;
+	virtual void InstantiateAndUpdate(TiState& state, Addr addr) override;
 
 private:
 	std::shared_ptr<expr> left;
@@ -69,6 +81,8 @@ public:
 		exprs(std::move(exprs))
 	{}
 	~ELet() override {}
+	virtual void Instantiate(TiState& state) override;
+	virtual void InstantiateAndUpdate(TiState& state, Addr addr) override;
 
 private:
 	bool isRec;
@@ -79,7 +93,7 @@ private:
 class EAlter
 {
 public:
-	EAlter(int tag_, std::vector<std::string>&& params_, std::shared_ptr<expr> right_):
+	EAlter(int tag_, std::vector<std::string>&& params_, std::shared_ptr<expr> right_) :
 		tag(tag_),
 		params(std::move(params_)),
 		right(right_)
@@ -93,11 +107,13 @@ public:
 class ECase : public expr
 {
 public:
-	ECase(std::shared_ptr<expr> exprs, std::vector<std::shared_ptr<EAlter>> alters):
+	ECase(std::shared_ptr<expr> exprs, std::vector<std::shared_ptr<EAlter>> alters) :
 		exprs(std::move(exprs)),
 		alters(std::move(alters))
 	{}
 	~ECase() override {}
+	virtual void Instantiate(TiState& state) override;
+	virtual void InstantiateAndUpdate(TiState& state, Addr addr) override;
 
 private:
 	std::shared_ptr<expr> exprs;
@@ -107,11 +123,13 @@ private:
 class ELam : public expr
 {
 public:
-	ELam(std::vector<std::string> vars, std::shared_ptr<expr>& body):
+	ELam(std::vector<std::string> vars, std::shared_ptr<expr>& body) :
 		params(std::move(vars)),
 		body(body)
 	{}
 	~ELam() override {}
+	virtual void Instantiate(TiState& state) override;
+	virtual void InstantiateAndUpdate(TiState& state, Addr addr) override;
 
 private:
 	std::vector<std::string> params;
@@ -121,7 +139,7 @@ private:
 class ScDef
 {
 public:
-	ScDef(std::string name, std::vector<std::string> params, std::shared_ptr<expr> body):
+	ScDef(std::string name, std::vector<std::string> params, std::shared_ptr<expr> body) :
 		name(std::move(name)),
 		params(std::move(params)),
 		body(std::move(body))
@@ -134,7 +152,7 @@ public:
 class program
 {
 public:
-	program(std::vector<std::shared_ptr<ScDef>> defs):
+	program(std::vector<std::shared_ptr<ScDef>> defs) :
 		defs(std::move(defs))
 	{}
 	std::vector<std::shared_ptr<ScDef>> defs;

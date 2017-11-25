@@ -16,11 +16,10 @@ TiState compile(std::shared_ptr<program>& prog);
 std::vector<TiState> eval(TiState& initState);
 std::string showResult(std::vector<TiState>& theResult);
 
-using Addr = uint32_t;
 
 struct Node
 {
-	virtual ~Node() = 0;
+	virtual ~Node() = default;
 	virtual TiState& Advance(TiState& state) = 0;
 };
 
@@ -35,7 +34,6 @@ public:
 	{
 	public:
 		TiHeap();
-		TiHeap& Init();		// obtain the 'main' function's addr
 		Addr Alloc(std::shared_ptr<ScDef>& node);
 		Addr Alloc(NPrim& node);
 		TiHeap& Update(Addr addr, std::shared_ptr<Node>& newNode);
@@ -64,7 +62,7 @@ public:
 
 	TiState();
 
-	TiState& Init();
+	TiState& Init();		// obtain the 'main' function's addr
 	TiStack& GetStack();
 	TiDump& GetDump();
 	TiGlobal& GetGlobal();
@@ -98,6 +96,7 @@ public:
 		, body(body)
 	{}
 	TiState& Advance(TiState& state) override;
+	void GetArgs(TiState& state);
 
 	std::string name;
 	std::vector<std::string> params;
@@ -137,8 +136,8 @@ public:
 		: name(std::move(name))
 		, prim(prim)
 	{}
-	TiState& Advance(TiState& state) override;
-
+	TiState& Advance(TiState& state) override {return state;};
+	
 	std::string name;
 	Primitive prim;
 };
