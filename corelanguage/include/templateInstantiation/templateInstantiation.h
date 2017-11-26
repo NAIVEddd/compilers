@@ -7,6 +7,7 @@
 #include<vector>
 #include<map>
 #include<list>
+#include<type_traits>
 
 class TiState;
 class NPrim;
@@ -36,6 +37,7 @@ public:
 		TiHeap();
 		Addr Alloc(std::shared_ptr<ScDef>& node);
 		Addr Alloc(NPrim& node);
+		Addr Alloc(std::shared_ptr<Node>& node);
 		TiHeap& Update(Addr addr, std::shared_ptr<Node>& newNode);
 		TiHeap& Free(Addr addr);
 		std::shared_ptr<Node> LookUp(Addr addr);

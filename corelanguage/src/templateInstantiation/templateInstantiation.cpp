@@ -189,6 +189,16 @@ TiState::TiHeap::Alloc(NPrim & node)
 	return addr;
 }
 
+Addr
+TiState::TiHeap::Alloc(std::shared_ptr<Node>& node)
+{
+	auto addr = addrs1[0]++;
+	addrs2.push_back(addr);
+	programs.insert(std::make_pair(addr, std::make_pair(node, std::string(""))));
+	++allocTimes;
+	return addr;
+}
+
 TiState::TiHeap &
 TiState::TiHeap::Update(Addr addr, std::shared_ptr<Node>& newNode)
 {

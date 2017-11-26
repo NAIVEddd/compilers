@@ -9,7 +9,7 @@ class expr
 {
 public:
 	virtual ~expr() = default;
-	virtual void Instantiate(TiState& state) = 0;
+	virtual Addr Instantiate(TiState& state) = 0;
 	virtual void InstantiateAndUpdate(TiState& state, Addr addr) = 0;
 };
 
@@ -20,7 +20,7 @@ public:
 		name(std::move(name))
 	{}
 	~EVar() override {}
-	virtual void Instantiate(TiState& state) override;
+	virtual Addr Instantiate(TiState& state) override;
 	virtual void InstantiateAndUpdate(TiState& state, Addr addr) override;
 
 private:
@@ -34,7 +34,7 @@ public:
 		num(num)
 	{}
 	~ENum() override {}
-	virtual void Instantiate(TiState& state) override;
+	virtual Addr Instantiate(TiState& state) override;
 	virtual void InstantiateAndUpdate(TiState& state, Addr addr) override;
 
 private:
@@ -49,7 +49,7 @@ public:
 		arity(arity)
 	{}
 	~EConstr() override {}
-	virtual void Instantiate(TiState& state) override;
+	virtual Addr Instantiate(TiState& state) override;
 	virtual void InstantiateAndUpdate(TiState& state, Addr addr) override;
 
 private:
@@ -64,7 +64,7 @@ public:
 		right(std::move(right))
 	{}
 	~EAp() override {}
-	virtual void Instantiate(TiState& state) override;
+	virtual Addr Instantiate(TiState& state) override;
 	virtual void InstantiateAndUpdate(TiState& state, Addr addr) override;
 
 private:
@@ -81,9 +81,10 @@ public:
 		exprs(std::move(exprs))
 	{}
 	~ELet() override {}
-	virtual void Instantiate(TiState& state) override;
+	virtual Addr Instantiate(TiState& state) override;
 	virtual void InstantiateAndUpdate(TiState& state, Addr addr) override;
 
+	void InstantiateDefs(TiState& state);
 private:
 	bool isRec;
 	std::vector<std::pair<std::string, std::shared_ptr<expr>>> defines;
@@ -112,7 +113,7 @@ public:
 		alters(std::move(alters))
 	{}
 	~ECase() override {}
-	virtual void Instantiate(TiState& state) override;
+	virtual Addr Instantiate(TiState& state) override;
 	virtual void InstantiateAndUpdate(TiState& state, Addr addr) override;
 
 private:
@@ -128,7 +129,7 @@ public:
 		body(body)
 	{}
 	~ELam() override {}
-	virtual void Instantiate(TiState& state) override;
+	virtual Addr Instantiate(TiState& state) override;
 	virtual void InstantiateAndUpdate(TiState& state, Addr addr) override;
 
 private:
