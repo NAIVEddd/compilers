@@ -351,3 +351,44 @@ NSC::Advance(TiState & state)
 
 	return state;
 }
+
+TiState & NNum::Advance(TiState & state)
+{
+	auto& dump = state.GetDump();
+	if (dump.size() == 0)
+	{
+		throw "Length of dump should't be zero!\n";
+	}
+	auto stack = dump.back();
+	dump.pop_back();
+
+	auto& heap = state.GetHeap();
+	if (stack.size() == 2)
+	{
+		auto unaryOp = stack.back();
+		auto ap = stack.front();
+		auto newAp = std::make_shared<NAp>(unaryOp, state.GetStack().back());
+		heap.Update(ap, std::dynamic_pointer_cast<Node>(newAp));
+		state.GetStack().pop_back();
+		state.GetStack().push_back(ap);
+		state.GetStack().push_back(unaryOp);
+	}
+	else if(stack.size() == 3)
+	{
+		auto binOp = stack.back(); stack.pop_back();
+		auto ap1 = stack.back(); stack.pop_back();
+		auto ap2 = stack.back();
+		auto newAp = std::make_shared<NAp>(binOp, state.GetStack().back());
+		heap.Update(ap1, std::dynamic_pointer_cast<Node>(newAp));
+		state.GetStack().pop_back();
+		state.GetStack().push_back(ap2);
+		state.GetStack().push_back(ap1);
+		state.GetStack().push_back(binOp);
+	}
+	else
+	{
+		throw "NNum : length of stack too long!\n";
+	}
+
+	return state;
+}
