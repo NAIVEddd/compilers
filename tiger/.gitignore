@@ -1,5 +1,6 @@
 boost/
 boost_1_67_0/
-**/tiger/*
 googletest-master/
 .vscode/
+*.out
+*.o
