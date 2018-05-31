@@ -1,6 +1,15 @@
 #include "testCase.h"
 #include "./tiger/chap4/symbol.h"
 
+// the tiger func f.
+// function f(a:int, b:int, c:int) = {
+//     print_int(a + c);
+//     let var j := a + b
+//         var a := "hello"
+//       in print(a); print_int(j)
+//     end;
+//     print_int(b);
+// }
 A_fundec funcF()
 {
     return A_Fundec(0, S_Symbol("f"),
