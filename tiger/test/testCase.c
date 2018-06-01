@@ -48,3 +48,21 @@ A_fundec funcF()
                                         A_ExpList(call_print_int_b, NULL)),
                               NULL));
 }
+
+
+/* an array type and an array variable */
+//
+// let
+// 	type  arrtype = array of int
+// 	var arr1:arrtype := arrtype [10] of 0
+// in
+// 	arr1
+// end
+A_exp ArrayType()
+{
+    A_pos nilPos = 0;
+    A_dec arrtype = A_TypeDec(nilPos, A_NametyList(A_Namety(S_Symbol("arrtype"), A_ArrayTy(nilPos, S_Symbol("int"))), NULL));
+    A_dec arr1 = A_VarDec(nilPos, S_Symbol("arr1"), S_Symbol("arrtype"), A_ArrayExp(nilPos, S_Symbol("arrtype"), 10, 0));
+    return A_LetExp(nilPos, A_DecList(arrtype, A_DecList(arr1, NULL)),
+        A_VarExp(nilPos, A_SimpleVar(nilPos, S_Symbol("arr1"))));
+}
