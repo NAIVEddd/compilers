@@ -1,6 +1,10 @@
 #include "testCase.h"
 #include "./tiger/chap4/symbol.h"
 
+#ifndef NULL
+#define NULL 0
+#endif
+
 // the tiger func f.
 //
 // function f(a:int, b:int, c:int) = {
@@ -30,25 +34,23 @@ A_fundec funcF()
     A_field field_c = A_Field(nilPos, smb_c, smb_int);
     A_fieldList func_f_params = A_FieldList(field_a, A_FieldList(field_b, A_FieldList(field_c, NULL)));
 
-    A_exp a_plus_c = A_OpExp(nilPos, A_plusOp, A_SimpleVar(nilPos, smb_a), A_SimpleVar(nilPos, smb_c));
+    A_exp a_plus_c = A_OpExp(nilPos, A_plusOp, A_VarExp(nilPos, A_SimpleVar(nilPos, smb_a)), A_VarExp(nilPos, A_SimpleVar(nilPos, smb_c)));
     A_exp call_print_int = A_CallExp(nilPos, smb_print_int, A_ExpList(a_plus_c, NULL));
 
-    A_dec dec_j = A_VarDec(nilPos, smb_j, smb_var, A_OpExp(nilPos, A_plusOp, A_SimpleVar(nilPos, smb_a), A_SimpleVar(nilPos, smb_b)));
-    A_dec dec_a = A_VarDec(nilPos, A_SimpleVar(nilPos, smb_a), smb_var, A_StringExp(nilPos, "hello"));
-    A_exp call_print_a = A_CallExp(nilPos, smb_print, A_SimpleVar(nilPos, smb_a));
-    A_exp call_print_int_j = A_CallExp(nilPos, smb_print_int, A_SimpleVar(nilPos, smb_j));
-    A_exp call_print_int_b = A_CallExp(nilPos, smb_print_int, A_ExpList(A_SimpleVar(nilPos, smb_b), NULL));
+    A_dec dec_j = A_VarDec(nilPos, smb_j, smb_var, A_OpExp(nilPos, A_plusOp, A_VarExp(nilPos, A_SimpleVar(nilPos, smb_a)), A_VarExp(nilPos, A_SimpleVar(nilPos, smb_b))));
+    A_dec dec_a = A_VarDec(nilPos, smb_a, smb_var, A_StringExp(nilPos, "hello"));
+    A_exp call_print_a = A_CallExp(nilPos, smb_print, A_ExpList(A_VarExp(nilPos, A_SimpleVar(nilPos, smb_a)), NULL));
+    A_exp call_print_int_j = A_CallExp(nilPos, smb_print_int, A_ExpList(A_VarExp(nilPos, A_SimpleVar(nilPos, smb_j)), NULL));
+    A_exp call_print_int_b = A_CallExp(nilPos, smb_print_int, A_ExpList(A_VarExp(nilPos, A_SimpleVar(nilPos, smb_b)), NULL));
 
     return A_Fundec(nilPos, smb_f, func_f_params, smb_void,
-                    A_ExpList(call_print_int,
-                              A_ExpList(A_LetExp(nilPos, A_DecList(dec_j, A_DecList(dec_a, NULL)),
-                                                 A_ExpList(call_print_a,
-                                                           A_ExpList(call_print_int_j,
-                                                                     NULL))),
-                                        A_ExpList(call_print_int_b, NULL)),
-                              NULL));
+                    A_SeqExp(nilPos, A_ExpList(call_print_int,
+                                               A_ExpList(A_LetExp(nilPos, A_DecList(dec_j, A_DecList(dec_a, NULL)),
+                                                                  A_SeqExp(nilPos, A_ExpList(call_print_a,
+                                                                                             A_ExpList(call_print_int_j,
+                                                                                                       NULL)))),
+                                                         A_ExpList(call_print_int_b, NULL)))));
 }
-
 
 /* an array type and an array variable */
 //
@@ -62,9 +64,9 @@ A_exp ArrayType()
 {
     A_pos nilPos = 0;
     A_dec arrtype = A_TypeDec(nilPos, A_NametyList(A_Namety(S_Symbol("arrtype"), A_ArrayTy(nilPos, S_Symbol("int"))), NULL));
-    A_dec arr1 = A_VarDec(nilPos, S_Symbol("arr1"), S_Symbol("arrtype"), A_ArrayExp(nilPos, S_Symbol("arrtype"), 10, 0));
+    A_dec arr1 = A_VarDec(nilPos, S_Symbol("arr1"), S_Symbol("arrtype"), A_ArrayExp(nilPos, S_Symbol("arrtype"), A_IntExp(nilPos, 10), A_IntExp(nilPos, 0)));
     return A_LetExp(nilPos, A_DecList(arrtype, A_DecList(arr1, NULL)),
-        A_VarExp(nilPos, A_SimpleVar(nilPos, S_Symbol("arr1"))));
+                    A_VarExp(nilPos, A_SimpleVar(nilPos, S_Symbol("arr1"))));
 }
 
 /* a record type and a record variable */
@@ -87,11 +89,10 @@ A_exp RecordVar()
                                            NULL));
     A_dec rec1 = A_VarDec(nilPos,
                           S_Symbol("rec1"),
-                          A_NameTy(nilPos,
-                                   S_Symbol("rectype")),
+                          S_Symbol("rectype"),
                           A_RecordExp(nilPos,
                                       S_Symbol("rectype"),
-                                      A_EfieldList(A_Efield(S_Symbol("name"), A_VarExp(nilPos, A_StringExp(nilPos, "Nobody"))),
+                                      A_EfieldList(A_Efield(S_Symbol("name"), A_StringExp(nilPos, "Nobody")),
                                                    A_EfieldList(A_Efield(S_Symbol("age"), A_IntExp(nilPos, 1000)),
                                                                 NULL))));
     A_var rec1_name = A_FieldVar(nilPos,
@@ -101,7 +102,7 @@ A_exp RecordVar()
                                A_StringExp(nilPos, "Somebody"));
     return A_LetExp(nilPos,
                     A_DecList(rectype, A_DecList(rec1, NULL)),
-                    A_ExpList(assign,
-                              A_ExpList(A_VarExp(A_SimpleVar(nilPos, S_Symbol("rec1"))),
-                                        NULL)));
+                    A_SeqExp(A_ExpList(assign,
+                                       A_ExpList(A_VarExp(nilPos, A_SimpleVar(nilPos, S_Symbol("rec1"))),
+                                                 NULL))));
 }

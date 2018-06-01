@@ -1,3 +1,4 @@
+#pragma once
 /*
  * absyn.h - Abstract Syntax Header (Chapter 4)
  *
@@ -6,6 +7,8 @@
  */
 
 /* Type Definitions */
+#include"util.h"
+#include"symbol.h"
 
 typedef int A_pos;
 
