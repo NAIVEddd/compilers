@@ -66,3 +66,43 @@ A_exp ArrayType()
     return A_LetExp(nilPos, A_DecList(arrtype, A_DecList(arr1, NULL)),
         A_VarExp(nilPos, A_SimpleVar(nilPos, S_Symbol("arr1"))));
 }
+
+/* a record type and a record variable */
+//
+// let
+// 	type  rectype = {name:string, age:int}
+// 	var rec1:rectype := rectype {name="Nobody", age=1000}
+// in
+// 	rec1.name := "Somebody";
+// 	rec1
+// end
+A_exp RecordVar()
+{
+    A_pos nilPos = 0;
+    A_dec rectype = A_TypeDec(nilPos,
+                              A_NametyList(A_NameTy(nilPos,
+                                                    A_RecordTy(nilPos,
+                                                               A_FieldList(A_Field(nilPos, S_Symbol("name"), S_Symbol("string")),
+                                                                           A_FieldList(A_Field(nilPos, S_Symbol("age"), S_Symbol("int")),
+                                                                                       NULL)))),
+                                           NULL));
+    A_dec rec1 = A_VarDec(nilPos,
+                          S_Symbol("rec1"),
+                          A_NameTy(nilPos,
+                                   S_Symbol("rectype")),
+                          A_RecordExp(nilPos,
+                                      S_Symbol("rectype"),
+                                      A_EfieldList(A_Efield(S_Symbol("name"), A_VarExp(nilPos, A_StringExp(nilPos, "Nobody"))),
+                                                   A_EfieldList(A_Efield(S_Symbol("age"), A_IntExp(nilPos, 1000)),
+                                                                NULL))));
+    A_var rec1_name = A_FieldVar(nilPos,
+                                 A_SimpleVar(nilPos, S_Symbol("rec1")), S_Symbol("name"));
+    A_exp assign = A_AssignExp(nilPos,
+                               rec1_name,
+                               A_StringExp(nilPos, "Somebody"));
+    return A_LetExp(nilPos,
+                    A_DecList(rectype, A_DecList(rec1, NULL)),
+                    A_ExpList(assign,
+                              A_ExpList(A_VarExp(A_SimpleVar(nilPos, S_Symbol("rec1"))),
+                                        NULL)));
+}
