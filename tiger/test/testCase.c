@@ -80,11 +80,10 @@ A_exp RecordVar()
 {
     A_pos nilPos = 0;
     A_dec rectype = A_TypeDec(nilPos,
-                              A_NametyList(A_NameTy(nilPos,
-                                                    A_RecordTy(nilPos,
-                                                               A_FieldList(A_Field(nilPos, S_Symbol("name"), S_Symbol("string")),
-                                                                           A_FieldList(A_Field(nilPos, S_Symbol("age"), S_Symbol("int")),
-                                                                                       NULL)))),
+                              A_NametyList(A_Namety(S_Symbol("rectype"),
+                                                    A_RecordTy(nilPos, A_FieldList(A_Field(nilPos, S_Symbol("name"), S_Symbol("string")),
+                                                                                   A_FieldList(A_Field(nilPos, S_Symbol("age"), S_Symbol("int")),
+                                                                                               NULL)))),
                                            NULL));
     A_dec rec1 = A_VarDec(nilPos,
                           S_Symbol("rec1"),
