@@ -4,6 +4,7 @@
  * All types and functions declared in this header file begin with "Ty_"
  * Linked list types end with "..list"
  */
+#pragma once 
 
 typedef struct Ty_ty_ *Ty_ty;
 typedef struct Ty_tyList_ *Ty_tyList;
@@ -30,6 +31,8 @@ Ty_ty Ty_Void(void);
 Ty_ty Ty_Record(Ty_fieldList fields);
 Ty_ty Ty_Array(Ty_ty ty);
 Ty_ty Ty_Name(S_symbol sym, Ty_ty ty);
+
+Ty_ty actual_ty(Ty_ty ty);
 
 Ty_tyList Ty_TyList(Ty_ty head, Ty_tyList tail);
 Ty_field Ty_Field(S_symbol name, Ty_ty ty);

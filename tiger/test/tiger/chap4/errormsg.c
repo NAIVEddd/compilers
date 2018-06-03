@@ -19,7 +19,7 @@ static int lineNum = 1;
 
 int EM_tokPos=0;
 
-extern FILE *yyin;
+// extern FILE *yyin;
 
 typedef struct intList {int i; struct intList *rest;} *IntList;
 
@@ -59,7 +59,7 @@ void EM_reset(string fname)
 {
  anyErrors=FALSE; fileName=fname; lineNum=1;
  linePos=intList(0,NULL);
- yyin = fopen(fname,"r");
- if (!yyin) {EM_error(0,"cannot open"); exit(1);}
+//  yyin = fopen(fname,"r");
+//  if (!yyin) {EM_error(0,"cannot open"); exit(1);}
 }
 

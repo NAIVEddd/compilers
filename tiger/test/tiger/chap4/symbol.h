@@ -3,6 +3,7 @@
  *
  */
 #pragma once
+#include"util.h"
 
 typedef struct S_symbol_ *S_symbol;
 

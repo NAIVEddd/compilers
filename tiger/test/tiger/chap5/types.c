@@ -6,8 +6,8 @@
  */
 
 #include <stdio.h>
-#include "util.h"
-#include "symbol.h"
+#include "../chap4/util.h"
+#include "../chap4/symbol.h"
 #include "types.h"
 
 static struct Ty_ty_ tynil = {Ty_nil};
@@ -44,6 +44,11 @@ Ty_ty Ty_Name(S_symbol sym, Ty_ty ty)
  return p;
 }
 
+Ty_ty actual_ty(Ty_ty ty)
+{
+  // todo
+  return ty;
+}
 
 Ty_tyList Ty_TyList(Ty_ty head, Ty_tyList tail)
 {Ty_tyList p = checked_malloc(sizeof(*p));

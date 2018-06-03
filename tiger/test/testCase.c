@@ -102,7 +102,7 @@ A_exp RecordVar()
                                A_StringExp(nilPos, "Somebody"));
     return A_LetExp(nilPos,
                     A_DecList(rectype, A_DecList(rec1, NULL)),
-                    A_SeqExp(A_ExpList(assign,
+                    A_SeqExp(nilPos, A_ExpList(assign,
                                        A_ExpList(A_VarExp(nilPos, A_SimpleVar(nilPos, S_Symbol("rec1"))),
                                                  NULL))));
 }

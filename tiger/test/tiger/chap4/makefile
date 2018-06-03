@@ -21,8 +21,8 @@
 #lex.yy.c: tiger.lex
 #	lex tiger.lex
 
-a.out: absyn.o semant.o symbol.o table.o util.o testCase.o main.c 
-	cc -g absyn.o semant.o symbol.o table.o util.o testCase.o main.c
+a.out: absyn.o semant.o symbol.o table.o util.o testCase.o env.o types.o errormsg.o main.c 
+	cc -g absyn.o semant.o symbol.o table.o util.o testCase.o env.o types.o errormsg.o main.c
 
 absyn.o: absyn.c absyn.h symbol.h util.h
 	cc -g -c absyn.c
@@ -41,6 +41,15 @@ testCase.o: symbol.o
 
 symbol.o: symbol.c table.h util.h
 	cc -g -c symbol.c
+
+types.o: ../chap5/types.c util.o symbol.o
+	cc -g -c ../chap5/types.c
+
+semant.o: semant.c types.o errormsg.o
+	cc -g -c semant.c types.o errormsg.o
+
+env.o: env.c
+	cc -g -c env.c
 
 clean: 
 	rm -f a.out *.o
