@@ -15,8 +15,13 @@ int main()
         S_table tenv = E_base_tenv();
         S_enter(tenv, dec_j->u.type->head->name, dec_j->u.type->head->ty); // actual_ty
         S_table venv = E_base_venv();
-        // S_enter(venv, dec_j->u.var.var, )
-        struct expty ety = transVar(tenv, tenv, A_SimpleVar(nilPos, smb_a));
+        S_enter(venv, dec_j->u.var.var, E_VarEntry(Ty_Int()));
+        struct expty ety = transVar(venv, tenv, A_SimpleVar(nilPos, smb_j));
+    }
+    {
+        S_table venv = E_base_venv();
+        S_table tenv = E_base_tenv();
+        struct expty ety = transExp(venv, tenv, ArrayType());
     }
     return 0;
 }

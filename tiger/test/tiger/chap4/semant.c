@@ -128,10 +128,101 @@ struct expty transExp(S_table venv, S_table tenv, A_exp a)
                 return expTy(NULL, x->u.fun.result);
             }
         }
+        break;
+        case A_opExp:
+        {
+            struct expty left = transExp(venv, tenv, a->u.op.left);
+            struct expty right = transExp(venv, tenv, a->u.op.right);
+            switch(a->u.op.oper)
+            {
+                case A_plusOp:
+                {
+                    return expTy(NULL, Ty_Int());
+                }
+                break;
+                default:
+                {
+                    return expTy(NULL, Ty_Nil());
+                }
+            }
+        }
+        break;
+        case A_recordExp:
+        {
+            E_enventry x = S_look(tenv, S_name(a->u.record.typ));
+            if(x && x->kind == E_varEntry)
+            {
+                return expTy(NULL, actual_ty(x->u.var.ty));
+            }
+            else
+            {
+                return expTy(NULL, Ty_Nil());
+            }
+        }
+        break;
+        case A_seqExp:
+        {
+            struct expty res = expTy(NULL, Ty_Nil());
+            for(A_expList exps = a->u.seq; exps; exps = exps->tail)
+            {
+                res = transExp(venv, tenv, exps->head);
+            }
+            return res;
+        }
+        break;
+        case A_assignExp:
+        {
+            struct expty var = transVar(venv, tenv, a->u.assign.var);
+            struct expty exp = transExp(venv, tenv, a->u.assign.exp);
+            if(var.ty == exp.ty)
+            {
+                return expTy(NULL, var.ty); // should be call actual_ty()?
+            }
+            else
+            {
+                return expTy(NULL, Ty_Nil());
+            }
+        }
+        break;
+        case A_ifExp:
+        {
+            struct expty testT = transExp(venv, tenv, a->u.iff.test);
+            if(testT.ty->kind != Ty_int)
+            {
+                return expTy(NULL, Ty_Nil());
+            }
+            struct expty thenT = transExp(venv, tenv, a->u.iff.then);
+            struct expty elseT = transExp(venv, tenv, a->u.iff.elsee);
+            if(thenT.ty->kind == elseT.ty->kind)    // actual_ty(then) == actual_ty(else)
+            {
+                thenT.exp = NULL;
+                return thenT;
+            }
+            else
+            {
+                return expTy(NULL, Ty_Nil());
+            }
+        }
+        break;
+        case A_whileExp:
+        {
+            struct expty testT = transExp(venv, tenv, a->u.whilee.test);
+            if(testT.ty->kind != Ty_int)
+            {
+                return expTy(NULL, Ty_Nil());
+            }
+            return transExp(venv, tenv, a->u.whilee.body);
+        }
+        break;
+        case A_forExp:
+        {
+            
+        }
+        break;
 
-        // {enum {A_callExp,
-	    //    A_opExp, A_recordExp, A_seqExp, A_assignExp, A_ifExp,
-	    //    A_whileExp, A_forExp, A_breakExp, A_letExp, A_arrayExp} kind;
+        // {enum {
+	    //    , , , , ,
+	    //    , , A_breakExp, A_letExp, A_arrayExp} kind;
     }
 }
 void transDec(S_table venv, S_table tenv, A_dec d);
