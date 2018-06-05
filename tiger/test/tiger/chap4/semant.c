@@ -149,7 +149,7 @@ struct expty transExp(S_table venv, S_table tenv, A_exp a)
         break;
         case A_recordExp:
         {
-            E_enventry x = S_look(tenv, S_name(a->u.record.typ));
+            E_enventry x = S_look(tenv, a->u.record.typ);
             if(x && x->kind == E_varEntry)
             {
                 return expTy(NULL, actual_ty(x->u.var.ty));
@@ -216,14 +216,56 @@ struct expty transExp(S_table venv, S_table tenv, A_exp a)
         break;
         case A_forExp:
         {
-            
+            E_enventry varV = S_look(venv, a->u.forr.var);
+            if(varV->kind != E_varEntry)
+            {
+                return expTy(NULL, Ty_Nil());
+            }
+            struct expty loT = transExp(venv, tenv, a->u.forr.lo);
+            struct expty hiT = transExp(venv, tenv, a->u.forr.hi);
+            struct expty bodyT = transExp(venv, tenv, a->u.forr.body);
+            return bodyT;
         }
         break;
+        case A_breakExp:
+        {
 
-        // {enum {
-	    //    , , , , ,
-	    //    , , A_breakExp, A_letExp, A_arrayExp} kind;
+        }
+        break;
+        case A_letExp:
+        {
+            struct expty exp;
+            A_decList d;
+            S_beginScope(venv);
+            S_beginScope(tenv);
+            for(d = a->u.let.decs; d; d = d->tail)
+            {
+                transDec(venv, tenv, d->head);
+            }
+            exp = transExp(venv, tenv, a->u.let.body);
+            S_endScope(tenv);
+            S_endScope(venv);
+            return exp;
+        }
+        break;
+        case A_arrayExp:
+        {
+            E_enventry varV = S_look(venv, a->u.array.typ);
+            struct expty expSz = transExp(venv, tenv, a->u.array.size);
+            struct expty expInit = transExp(venv, tenv, a->u.array.init);
+            return expTy(NULL, Ty_Array(varV->u.var.ty));
+        }
+        break;
+        default :
+        {
+            return expTy(NULL, Ty_Nil());
+        }
+        break;
     }
+    assert(0);
 }
-void transDec(S_table venv, S_table tenv, A_dec d);
+void transDec(S_table venv, S_table tenv, A_dec d)
+{
+    
+}
 Ty_ty transTy(S_table tenv, A_ty a);
