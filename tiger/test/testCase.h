@@ -4,3 +4,4 @@
 A_fundec funcF();
 A_exp ArrayType();
 A_exp RecordVar();
+A_exp MakeQueensTig();

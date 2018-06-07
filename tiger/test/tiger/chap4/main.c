@@ -21,7 +21,20 @@ int main()
     {
         S_table venv = E_base_venv();
         S_table tenv = E_base_tenv();
-        struct expty ety = transExp(venv, tenv, ArrayType());
+        S_enter(tenv, S_Symbol("void"), Ty_Void());
+        S_enter(tenv, S_Symbol("int"), Ty_Int());
+        S_enter(tenv, S_Symbol("string"), Ty_String());
+        S_enter(tenv, S_Symbol("nil"), Ty_Nil());
+        // struct expty ety = transExp(venv, tenv, ArrayType());
+    }
+    {
+        S_table venv = E_base_venv();
+        S_table tenv = E_base_tenv();
+        S_enter(tenv, S_Symbol("void"), Ty_Void());
+        S_enter(tenv, S_Symbol("int"), Ty_Int());
+        S_enter(tenv, S_Symbol("string"), Ty_String());
+        S_enter(tenv, S_Symbol("nil"), Ty_Nil());
+        struct expty ety = transExp(venv, tenv, MakeQueensTig());
     }
     return 0;
 }
