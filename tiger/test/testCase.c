@@ -130,7 +130,7 @@ A_exp MakeQueensTig()
     A_var v_N = A_SimpleVar(nilPos, s_N);
     A_exp ei_0 = A_IntExp(nilPos, 0);
 
-    A_dec dv_N = A_VarDec(nilPos, s_N, s_var, A_IntExp(nilPos, 8));
+    A_dec dv_N = A_VarDec(nilPos, s_N, NULL, A_IntExp(nilPos, 8));
     A_dec dt_intArray = A_TypeDec(nilPos, A_NametyList(A_Namety(s_intArray, A_ArrayTy(nilPos, s_int)), NULL));
     A_dec dv_row = A_VarDec(nilPos, s_row, NULL, A_ArrayExp(nilPos, s_intArray, v_N, ei_0));
     A_dec dv_col = A_VarDec(nilPos, s_col, NULL, A_ArrayExp(nilPos, s_intArray, v_N, ei_0));
