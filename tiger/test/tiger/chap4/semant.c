@@ -136,6 +136,9 @@ struct expty transExp(S_table venv, S_table tenv, A_exp a)
         switch (a->u.op.oper)
         {
         case A_plusOp:
+        case A_minusOp:
+        case A_timesOp:
+        case A_divideOp:
         {
             return expTy(NULL, Ty_Int());
         }
@@ -223,6 +226,7 @@ struct expty transExp(S_table venv, S_table tenv, A_exp a)
         struct expty loT = transExp(venv, tenv, a->u.forr.lo);
         struct expty hiT = transExp(venv, tenv, a->u.forr.hi);
         struct expty bodyT = transExp(venv, tenv, a->u.forr.body);
+        S_endScope(venv);
         return bodyT;
     }
     break;
@@ -316,7 +320,9 @@ void transDec(S_table venv, S_table tenv, A_dec d)
         }
         for (types = d->u.type; types; types = types->tail)
         {
-            S_enter(tenv, types->head->name, Ty_Name(types->head->name, transTy(tenv, d->u.type->head->ty)));
+            Ty_ty name = S_look(tenv, types->head->name);
+            name->u.name.ty = transTy(tenv, d->u.type->head->ty);
+            // S_enter(tenv, types->head->name, Ty_Name(types->head->name, transTy(tenv, d->u.type->head->ty)));
         }
     }
     break;
@@ -339,7 +345,7 @@ Ty_ty transTy(S_table tenv, A_ty a)
     break;
     case A_arrayTy:
     {
-        return S_look(tenv, a->u.array);
+        return Ty_Array(S_look(tenv, a->u.array));
     }
     break;
     case A_recordTy:
