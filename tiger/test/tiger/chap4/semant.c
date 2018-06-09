@@ -145,7 +145,7 @@ struct expty transExp(S_table venv, S_table tenv, A_exp a)
         break;
         default:
         {
-            return expTy(NULL, Ty_Nil());
+            return expTy(NULL, Ty_Int());
         }
         }
     }
