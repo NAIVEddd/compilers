@@ -36,6 +36,10 @@ int main()
         S_enter(tenv, S_Symbol("string"), Ty_String());
         S_enter(tenv, S_Symbol("nil"), Ty_Nil());
         struct expty ety = transExp(venv, tenv, MakeQueensTig());
+        if(ety.exp == NULL)
+        {
+            printf("hey there.\n");
+        }
     }
     return 0;
 }

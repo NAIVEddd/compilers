@@ -194,8 +194,15 @@ struct expty transExp(S_table venv, S_table tenv, A_exp a)
         {
             return expTy(NULL, Ty_Nil());
         }
+        if(a->u.iff.then == NULL)
+        {
+            printf("if exp must have then exp.\n");
+            return expTy(NULL, Ty_Nil());
+        }
         struct expty thenT = transExp(venv, tenv, a->u.iff.then);
-        struct expty elseT = transExp(venv, tenv, a->u.iff.elsee);
+        struct expty elseT = thenT;
+        if(a->u.iff.elsee)
+            elseT = transExp(venv, tenv, a->u.iff.elsee);
         if (thenT.ty->kind == elseT.ty->kind) // actual_ty(then) == actual_ty(else)
         {
             thenT.exp = NULL;
@@ -288,21 +295,30 @@ void transDec(S_table venv, S_table tenv, A_dec d)
     {
     case A_functionDec:
     {
-        A_fundec f = d->u.function->head;
-        Ty_ty resultTy = S_look(tenv, f->result);
-        Ty_tyList formalTys = makeFormalTyList(tenv, f->params);
-        S_enter(venv, f->name, E_FunEntry(formalTys, resultTy));
-        S_beginScope(venv);
+        for(A_fundecList l = d->u.function; l; l = l->tail)
         {
-            A_fieldList l;
-            Ty_tyList t;
-            for (l = f->params, t = formalTys; l; l = l->tail, t = t->tail)
-            {
-                S_enter(venv, l->head->name, E_VarEntry(t->head));
-            }
+            A_fundec f = l->head;
+            Ty_ty resultTy = S_look(tenv, f->result);
+            Ty_tyList formalTys = makeFormalTyList(tenv, f->params);
+            S_enter(venv, f->name, E_FunEntry(formalTys, resultTy));
         }
-        transExp(venv, tenv, d->u.function->head->body);
-        S_endScope(venv);
+
+        for(A_fundecList fl = d->u.function; fl; fl = fl->tail)
+        {
+            A_fundec f = fl->head;
+            Ty_tyList formalTys = ((E_enventry)S_look(venv, f->name))->u.fun.formals;
+            S_beginScope(venv);
+            {
+                A_fieldList l;
+                Ty_tyList t;
+                for (l = f->params, t = formalTys; l; l = l->tail, t = t->tail)
+                {
+                    S_enter(venv, l->head->name, E_VarEntry(t->head));
+                }
+            }
+            transExp(venv, tenv, f->body);
+            S_endScope(venv);
+        }
     }
     break;
     case A_varDec:
@@ -322,7 +338,6 @@ void transDec(S_table venv, S_table tenv, A_dec d)
         {
             Ty_ty name = S_look(tenv, types->head->name);
             name->u.name.ty = transTy(tenv, d->u.type->head->ty);
-            // S_enter(tenv, types->head->name, Ty_Name(types->head->name, transTy(tenv, d->u.type->head->ty)));
         }
     }
     break;
