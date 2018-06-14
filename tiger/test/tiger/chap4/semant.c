@@ -262,7 +262,7 @@ struct expty transExp(S_table venv, S_table tenv, A_exp a)
         Ty_ty varT = S_look(tenv, a->u.array.typ);
         struct expty expSz = transExp(venv, tenv, a->u.array.size);
         struct expty expInit = transExp(venv, tenv, a->u.array.init);
-        return expTy(NULL, Ty_Array(varT));
+        return expTy(NULL, varT);
     }
     break;
     default:
