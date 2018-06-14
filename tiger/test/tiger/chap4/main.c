@@ -2,6 +2,7 @@
 #include "table.h"
 #include "semant.h"
 #include "env.h"
+#include <stdio.h>
 
 int main()
 {

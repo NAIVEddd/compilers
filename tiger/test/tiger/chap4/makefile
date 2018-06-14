@@ -45,8 +45,8 @@ symbol.o: symbol.c table.h util.h
 types.o: ../chap5/types.c util.o symbol.o
 	cc -g -c ../chap5/types.c
 
-semant.o: semant.c types.o errormsg.o
-	cc -g -c semant.c types.o errormsg.o
+semant.o: semant.c
+	cc -g -c semant.c
 
 env.o: env.c
 	cc -g -c env.c

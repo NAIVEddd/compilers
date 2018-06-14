@@ -11,5 +11,5 @@ struct F_accessList_ {F_access head; F_accessList tail;};
 F_frame F_NewFrame(Temp_label name, U_boolList formals);
 
 Temp_label F_Name(F_frame f);
-F_acessList F_Formals(F_frame f);
+F_accessList F_Formals(F_frame f);
 F_access F_AllocLocal(F_frame f, bool escape);

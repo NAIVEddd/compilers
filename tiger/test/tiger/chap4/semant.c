@@ -2,6 +2,7 @@
 #include "semant.h"
 #include "env.h"
 #include "errormsg.h"
+#include "../chap6/translate.h"
 
 struct expty expTy(Tr_exp exp, Ty_ty ty)
 {

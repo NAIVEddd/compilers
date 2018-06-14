@@ -46,8 +46,20 @@ Ty_ty Ty_Name(S_symbol sym, Ty_ty ty)
 
 Ty_ty actual_ty(Ty_ty ty)
 {
-  // todo
-  return ty;
+  switch(ty->kind)
+  {
+    case Ty_name:
+    {
+      return ty->u.name.ty;
+    }
+    break;
+    default:
+    {
+      return ty;
+    }
+    break;
+  }
+  assert(0);
 }
 
 Ty_tyList Ty_TyList(Ty_ty head, Ty_tyList tail)
