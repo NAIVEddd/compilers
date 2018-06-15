@@ -46,18 +46,10 @@ struct expty transVar(S_table venv, S_table tenv, A_var v)
                 {
                     return expTy(NULL, actual_ty(field->head->ty));
                 }
-                else
-                {
-                    EM_error(v->pos, "undefine var's field %s", S_name(v->u.field.sym));
-                    return expTy(NULL, Ty_Int());
-                }
             }
         }
-        else
-        {
-            EM_error(v->pos, "undefine var's field1 %s", S_name(v->u.field.sym));
-            return expTy(NULL, Ty_Int());
-        }
+        EM_error(v->pos, "undefine var's field %s", S_name(v->u.field.sym));
+        return expTy(NULL, Ty_Int());
     }
     break;
     case A_subscriptVar:
