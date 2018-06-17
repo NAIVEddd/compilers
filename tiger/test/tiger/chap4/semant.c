@@ -12,7 +12,7 @@ struct expty expTy(Tr_exp exp, Ty_ty ty)
     return e;
 }
 
-struct expty transVar(S_table venv, S_table tenv, A_var v)
+struct expty transVar(S_table venv, S_table tenv, Tr_level level, A_var v)
 {
     switch (v->kind)
     {
@@ -76,7 +76,7 @@ struct expty transVar(S_table venv, S_table tenv, A_var v)
         break;
     }
 }
-struct expty transExp(S_table venv, S_table tenv, A_exp a)
+struct expty transExp(S_table venv, S_table tenv, Tr_level level, A_exp a)
 {
     switch (a->kind)
     {
@@ -124,8 +124,8 @@ struct expty transExp(S_table venv, S_table tenv, A_exp a)
     break;
     case A_opExp:
     {
-        struct expty left = transExp(venv, tenv, a->u.op.left);
-        struct expty right = transExp(venv, tenv, a->u.op.right);
+        struct expty left = transExp(venv, tenv, level, a->u.op.left);
+        struct expty right = transExp(venv, tenv, level, a->u.op.right);
         switch (a->u.op.oper)
         {
         case A_plusOp:
@@ -168,8 +168,8 @@ struct expty transExp(S_table venv, S_table tenv, A_exp a)
     break;
     case A_assignExp:
     {
-        struct expty var = transVar(venv, tenv, a->u.assign.var);
-        struct expty exp = transExp(venv, tenv, a->u.assign.exp);
+        struct expty var = transVar(venv, tenv, level, a->u.assign.var);
+        struct expty exp = transExp(venv, tenv, level, a->u.assign.exp);
         if (var.ty == exp.ty)
         {
             return expTy(NULL, var.ty); // should be call actual_ty()?
@@ -182,9 +182,10 @@ struct expty transExp(S_table venv, S_table tenv, A_exp a)
     break;
     case A_ifExp:
     {
-        struct expty testT = transExp(venv, tenv, a->u.iff.test);
+        struct expty testT = transExp(venv, tenv, level, a->u.iff.test);
         if (testT.ty->kind != Ty_int)
         {
+            printf("if test exp must been int exp.\n");
             return expTy(NULL, Ty_Nil());
         }
         if(a->u.iff.then == NULL)
@@ -192,10 +193,10 @@ struct expty transExp(S_table venv, S_table tenv, A_exp a)
             printf("if exp must have then exp.\n");
             return expTy(NULL, Ty_Nil());
         }
-        struct expty thenT = transExp(venv, tenv, a->u.iff.then);
+        struct expty thenT = transExp(venv, tenv, level, a->u.iff.then);
         struct expty elseT = thenT;
         if(a->u.iff.elsee)
-            elseT = transExp(venv, tenv, a->u.iff.elsee);
+            elseT = transExp(venv, tenv, level, a->u.iff.elsee);
         if (thenT.ty->kind == elseT.ty->kind) // actual_ty(then) == actual_ty(else)
         {
             thenT.exp = NULL;
@@ -209,23 +210,25 @@ struct expty transExp(S_table venv, S_table tenv, A_exp a)
     break;
     case A_whileExp:
     {
-        struct expty testT = transExp(venv, tenv, a->u.whilee.test);
+        struct expty testT = transExp(venv, tenv, level, a->u.whilee.test);
         if (testT.ty->kind != Ty_int)
         {
+            printf("while test exp must been int exp.\n");
             return expTy(NULL, Ty_Nil());
         }
-        return transExp(venv, tenv, a->u.whilee.body);
+        return transExp(venv, tenv, level, a->u.whilee.body);
     }
     break;
     case A_forExp:
     {
         S_beginScope(venv);
+        Tr_level forLevel = Tr_NewLevel(level, Temp_newlabel(), NULL);
         A_dec dec_var = A_VarDec(a->pos, a->u.forr.var, NULL, a->u.forr.lo);
-        transDec(venv, tenv, dec_var);
+        transDec(venv, tenv, forLevel, dec_var);
 
-        struct expty loT = transExp(venv, tenv, a->u.forr.lo);
-        struct expty hiT = transExp(venv, tenv, a->u.forr.hi);
-        struct expty bodyT = transExp(venv, tenv, a->u.forr.body);
+        struct expty loT = transExp(venv, tenv, forLevel, a->u.forr.lo);
+        struct expty hiT = transExp(venv, tenv, forLevel, a->u.forr.hi);
+        struct expty bodyT = transExp(venv, tenv, forLevel, a->u.forr.body);
         S_endScope(venv);
         return bodyT;
     }
@@ -240,11 +243,12 @@ struct expty transExp(S_table venv, S_table tenv, A_exp a)
         A_decList d;
         S_beginScope(venv);
         S_beginScope(tenv);
+        Tr_level letLevel = Tr_NewLevel(level, Temp_newlabel(), NULL);
         for (d = a->u.let.decs; d; d = d->tail)
         {
-            transDec(venv, tenv, d->head);
+            transDec(venv, tenv, letLevel, d->head);
         }
-        exp = transExp(venv, tenv, a->u.let.body);
+        exp = transExp(venv, tenv, letLevel, a->u.let.body);
         S_endScope(tenv);
         S_endScope(venv);
         return exp;
@@ -253,8 +257,8 @@ struct expty transExp(S_table venv, S_table tenv, A_exp a)
     case A_arrayExp:
     {
         Ty_ty varT = S_look(tenv, a->u.array.typ);
-        struct expty expSz = transExp(venv, tenv, a->u.array.size);
-        struct expty expInit = transExp(venv, tenv, a->u.array.init);
+        struct expty expSz = transExp(venv, tenv, level, a->u.array.size);
+        struct expty expInit = transExp(venv, tenv, level, a->u.array.init);
         return expTy(NULL, varT);
     }
     break;
@@ -282,7 +286,7 @@ Ty_tyList makeFormalTyList(S_table tenv, A_fieldList params)
     return res;
 }
 
-void transDec(S_table venv, S_table tenv, A_dec d)
+void transDec(S_table venv, S_table tenv, Tr_level level, A_dec d)
 {
     switch (d->kind)
     {
@@ -293,7 +297,7 @@ void transDec(S_table venv, S_table tenv, A_dec d)
             A_fundec f = l->head;
             Ty_ty resultTy = S_look(tenv, f->result);
             Ty_tyList formalTys = makeFormalTyList(tenv, f->params);
-            S_enter(venv, f->name, E_FunEntry(formalTys, resultTy));
+            S_enter(venv, f->name, E_FunEntry(level, Temp_newlabel(), formalTys, resultTy));
         }
 
         for(A_fundecList fl = d->u.function; fl; fl = fl->tail)
@@ -306,18 +310,20 @@ void transDec(S_table venv, S_table tenv, A_dec d)
                 Ty_tyList t;
                 for (l = f->params, t = formalTys; l; l = l->tail, t = t->tail)
                 {
-                    S_enter(venv, l->head->name, E_VarEntry(t->head));
+                    Tr_access varLocate = Tr_AllocLocal(level, TRUE);
+                    S_enter(venv, l->head->name, E_VarEntry(varLocate, t->head));
                 }
             }
-            transExp(venv, tenv, f->body);
+            transExp(venv, tenv, level, f->body);
             S_endScope(venv);
         }
     }
     break;
     case A_varDec:
     {
-        struct expty e = transExp(venv, tenv, d->u.var.init);
-        S_enter(venv, d->u.var.var, E_VarEntry(e.ty));
+        struct expty e = transExp(venv, tenv, level, d->u.var.init);
+        Tr_access mem = Tr_AllocLocal(level, TRUE);
+        S_enter(venv, d->u.var.var, E_VarEntry(mem, e.ty));
     }
     break;
     case A_typeDec:

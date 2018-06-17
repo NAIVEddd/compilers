@@ -50,7 +50,7 @@ Ty_ty actual_ty(Ty_ty ty)
   {
     case Ty_name:
     {
-      return ty->u.name.ty;
+      return actual_ty(ty->u.name.ty);
     }
     break;
     default:
