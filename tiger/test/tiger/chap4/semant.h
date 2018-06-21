@@ -13,7 +13,7 @@ struct expty
 struct expty expTy(Tr_exp exp, Ty_ty ty);
 
 // do some type check
-void SEM_transProc(A_exp exp);
+// F_fragList SEM_transProc(A_exp exp);
 
 struct expty transVar(S_table venv, S_table tenv, Tr_level level, A_var v);
 struct expty transExp(S_table venv, S_table tenv, Tr_level level, A_exp a);

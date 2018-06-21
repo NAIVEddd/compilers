@@ -1,5 +1,6 @@
 #pragma once
 #include"temp.h"
+#include"frame.h"
 #include"../chap4/util.h"
 
 typedef struct Tr_level_ * Tr_level;

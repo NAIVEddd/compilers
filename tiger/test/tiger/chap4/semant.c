@@ -82,7 +82,7 @@ struct expty transExp(S_table venv, S_table tenv, Tr_level level, A_exp a)
     {
     case A_varExp:
     {
-        return transVar(venv, tenv, a->u.var);
+        return transVar(venv, tenv, level, a->u.var);
     }
     break;
     case A_nilExp:
@@ -109,7 +109,7 @@ struct expty transExp(S_table venv, S_table tenv, Tr_level level, A_exp a)
             A_expList paramV = a->u.call.args;
             for (; paramT && paramV; paramT = paramT->tail, paramV = paramV->tail)
             {
-                struct expty vT = transExp(venv, tenv, paramV->head);
+                struct expty vT = transExp(venv, tenv, level, paramV->head);
                 if (paramT->head->kind != vT.ty->kind)
                     break;
             }
@@ -161,7 +161,7 @@ struct expty transExp(S_table venv, S_table tenv, Tr_level level, A_exp a)
         struct expty res = expTy(NULL, Ty_Nil());
         for (A_expList exps = a->u.seq; exps; exps = exps->tail)
         {
-            res = transExp(venv, tenv, exps->head);
+            res = transExp(venv, tenv, level, exps->head);
         }
         return res;
     }
