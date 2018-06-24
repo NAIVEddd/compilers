@@ -4,6 +4,9 @@
  */
 #pragma once
 #include<stdio.h>
+#include"../chap4/util.h"
+#include"../chap4/symbol.h"
+#include"../chap4/table.h"
 
 typedef struct Temp_temp_ *Temp_temp;
 Temp_temp Temp_newtemp(void);

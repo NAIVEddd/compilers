@@ -77,7 +77,7 @@ void yyerror(char *s)
 {
  EM_error(EM_tokPos, "%s", s);
 }
-A_exp absyn_root;
+extern A_exp absyn_root;
 
 #line 83 "y.tab.c" /* yacc.c:339  */
 

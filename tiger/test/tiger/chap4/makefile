@@ -21,8 +21,8 @@
 #lex.yy.c: tiger.lex
 #	lex tiger.lex
 
-a.out: absyn.o semant.o symbol.o table.o util.o testCase.o env.o types.o errormsg.o y.tab.o lex.yy.o parse.o main.c 
-	cc -g absyn.o semant.o symbol.o table.o util.o testCase.o env.o types.o errormsg.o y.tab.o lex.yy.o parse.o main.c
+a.out: absyn.o x86frame.o semant.o symbol.o table.o util.o testCase.o env.o types.o errormsg.o translate.o temp.o main.c y.tab.o lex.yy.o parse.o
+	cc -g absyn.o x86frame.o semant.o symbol.o table.o util.o testCase.o env.o types.o errormsg.o translate.o temp.o main.c y.tab.o lex.yy.o parse.o
 
 y.tab.o: y.tab.c
 	cc -g -c y.tab.c
@@ -34,7 +34,7 @@ lex.yy.o: lex.yy.c y.tab.h errormsg.h util.h
 	cc -g -c lex.yy.c
 
 lex.yy.c: tiger.lex
-	lex tiger.lex
+	flex tiger.lex
 
 absyn.o: absyn.c absyn.h symbol.h util.h
 	cc -g -c absyn.c
@@ -44,6 +44,15 @@ errormsg.o: errormsg.c errormsg.h util.h
 
 table.o: table.c table.h util.h
 	cc -g -c table.c
+
+x86frame.o: ../chap6/x86frame.c 
+	cc -g -c ../chap6/x86frame.c
+
+translate.o: ../chap6/translate.c
+	cc -g -c ../chap6/translate.c
+
+temp.o: ../chap6/temp.c
+	cc -g -c ../chap6/temp.c
 
 util.o: util.c util.h
 	cc -g -c util.c
