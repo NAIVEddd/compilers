@@ -1,4 +1,5 @@
 #include <stdio.h>
+#include "absync.h"
 #include "semant.h"
 #include "env.h"
 #include "errormsg.h"
@@ -188,14 +189,14 @@ struct expty transExp(S_table venv, S_table tenv, Tr_level level, A_exp a)
             printf("if test exp must been int exp.\n");
             return expTy(NULL, Ty_Nil());
         }
-        if(a->u.iff.then == NULL)
+        if (a->u.iff.then == NULL)
         {
             printf("if exp must have then exp.\n");
             return expTy(NULL, Ty_Nil());
         }
         struct expty thenT = transExp(venv, tenv, level, a->u.iff.then);
         struct expty elseT = thenT;
-        if(a->u.iff.elsee)
+        if (a->u.iff.elsee)
             elseT = transExp(venv, tenv, level, a->u.iff.elsee);
         if (thenT.ty->kind == elseT.ty->kind) // actual_ty(then) == actual_ty(else)
         {
@@ -286,13 +287,13 @@ Ty_tyList makeFormalTyList(S_table tenv, A_fieldList params)
     return res;
 }
 
-void transDec(S_table venv, S_table tenv, Tr_level level, A_dec d)
+Tr_exp transDec(S_table venv, S_table tenv, Tr_level level, A_dec d)
 {
     switch (d->kind)
     {
     case A_functionDec:
     {
-        for(A_fundecList l = d->u.function; l; l = l->tail)
+        for (A_fundecList l = d->u.function; l; l = l->tail)
         {
             A_fundec f = l->head;
             Ty_ty resultTy = S_look(tenv, f->result);
@@ -300,7 +301,7 @@ void transDec(S_table venv, S_table tenv, Tr_level level, A_dec d)
             S_enter(venv, f->name, E_FunEntry(level, Temp_newlabel(), formalTys, resultTy));
         }
 
-        for(A_fundecList fl = d->u.function; fl; fl = fl->tail)
+        for (A_fundecList fl = d->u.function; fl; fl = fl->tail)
         {
             A_fundec f = fl->head;
             Ty_tyList formalTys = ((E_enventry)S_look(venv, f->name))->u.fun.formals;
@@ -317,13 +318,42 @@ void transDec(S_table venv, S_table tenv, Tr_level level, A_dec d)
             transExp(venv, tenv, level, f->body);
             S_endScope(venv);
         }
+
+        // temp impl.
+        assert(0);
     }
     break;
     case A_varDec:
     {
-        struct expty e = transExp(venv, tenv, level, d->u.var.init);
+        if (!d->u.var.init && !d->u.var.typ)
+        {
+            assert(0);
+        }
+        struct expty res{NULL, NULL};
+        if (d->u.var.init)
+        {
+            struct expty e = transExp(venv, tenv, level, d->u.var.init);
+            // test is the init exp type equal to the var dec type.
+            // then set the correct type.
+            // if(d->u.var.typ)
+            // {
+            //     if(d->u.var.typ != e.ty.)
+            // }
+            // else
+            // {
+
+            // }
+
+            A_exp assign = A_AssignExp(d->pos, d->u.var.var, d->u.var.init);
+            res = transExp(venv, tenv, level, assign);
+        }
+        else
+        {
+            res = transVar(venv, tenv, level, d->u.var);
+        }
         Tr_access mem = Tr_AllocLocal(level, TRUE);
         S_enter(venv, d->u.var.var, E_VarEntry(mem, e.ty));
+        return res.exp;
     }
     break;
     case A_typeDec:
@@ -338,6 +368,9 @@ void transDec(S_table venv, S_table tenv, Tr_level level, A_dec d)
             Ty_ty name = S_look(tenv, types->head->name);
             name->u.name.ty = transTy(tenv, d->u.type->head->ty);
         }
+
+        // temp impl
+        assert(0);
     }
     break;
     default:
