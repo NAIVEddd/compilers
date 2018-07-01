@@ -3,8 +3,6 @@
 #include"../chap5/types.h"
 #include"../chap6/translate.h"
 
-typedef void* Tr_exp;
-
 struct expty
 {
     Tr_exp exp;

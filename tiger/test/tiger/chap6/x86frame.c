@@ -72,3 +72,23 @@ F_access F_AllocLocal(F_frame f, bool escape)
 
     return mem;
 }
+
+
+Temp_temp F_FP(void)
+{
+    static Temp_temp fp = NULL;
+    if(fp == NULL)
+    {
+        fp = Temp_newtemp();
+    }
+    return fp;
+}
+const int F_wordSize = 4;
+
+T_exp F_Exp(F_access acc, T_exp framePtr)
+{
+    T_exp exp = NULL;
+    if(acc->kind == inFrame) exp = T_Mem(T_Binop(T_plus, T_Const(acc->u.offset), framePtr));
+    else assert(0);     // no process if kind is inReg.
+    return exp;
+}

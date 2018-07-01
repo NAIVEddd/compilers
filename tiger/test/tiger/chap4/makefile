@@ -21,8 +21,8 @@
 #lex.yy.c: tiger.lex
 #	lex tiger.lex
 
-a.out: absyn.o x86frame.o semant.o symbol.o table.o util.o testCase.o env.o types.o errormsg.o translate.o temp.o main.c y.tab.o lex.yy.o parse.o
-	cc -g absyn.o x86frame.o semant.o symbol.o table.o util.o testCase.o env.o types.o errormsg.o translate.o temp.o main.c y.tab.o lex.yy.o parse.o
+a.out: absyn.o x86frame.o semant.o symbol.o table.o util.o testCase.o env.o types.o errormsg.o translate.o temp.o main.c y.tab.o lex.yy.o parse.o tree.o
+	cc -g absyn.o x86frame.o semant.o symbol.o table.o util.o testCase.o env.o types.o errormsg.o translate.o temp.o main.c y.tab.o lex.yy.o parse.o tree.o
 
 y.tab.o: y.tab.c
 	cc -g -c y.tab.c
@@ -74,6 +74,9 @@ parse.o: parse.c
 
 env.o: env.c
 	cc -g -c env.c
+
+tree.o: ../chap7/tree.c
+	cc -g -c ../chap7/tree.c
 
 clean: 
 	rm -f a.out *.o

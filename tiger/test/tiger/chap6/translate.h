@@ -2,6 +2,8 @@
 #include"temp.h"
 #include"frame.h"
 #include"../chap4/util.h"
+#include"../chap7/tree.h"
+typedef void* Tr_exp;
 
 typedef struct Tr_level_ * Tr_level;
 typedef struct Tr_access_ * Tr_access;
@@ -14,3 +16,5 @@ Tr_level Tr_Outermost();
 Tr_level Tr_NewLevel(Tr_level parent, Temp_label name, U_boolList formals);
 Tr_accessList Tr_Formals(Tr_level level);
 Tr_access Tr_AllocLocal(Tr_level level, bool escape);
+
+Tr_exp Tr_simpleVar(Tr_access , Tr_level);

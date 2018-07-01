@@ -1,9 +1,8 @@
 #include <stdio.h>
-#include "absync.h"
+#include "absyn.h"
 #include "semant.h"
 #include "env.h"
 #include "errormsg.h"
-#include "../chap6/translate.h"
 
 struct expty expTy(Tr_exp exp, Ty_ty ty)
 {
@@ -320,6 +319,7 @@ Tr_exp transDec(S_table venv, S_table tenv, Tr_level level, A_dec d)
         }
 
         // temp impl.
+        return T_Const(0);
         assert(0);
     }
     break;
@@ -329,30 +329,15 @@ Tr_exp transDec(S_table venv, S_table tenv, Tr_level level, A_dec d)
         {
             assert(0);
         }
-        struct expty res{NULL, NULL};
+        
+        Tr_access mem = Tr_AllocLocal(level, TRUE);
+        struct expty res;
         if (d->u.var.init)
         {
             struct expty e = transExp(venv, tenv, level, d->u.var.init);
-            // test is the init exp type equal to the var dec type.
-            // then set the correct type.
-            // if(d->u.var.typ)
-            // {
-            //     if(d->u.var.typ != e.ty.)
-            // }
-            // else
-            // {
-
-            // }
-
-            A_exp assign = A_AssignExp(d->pos, d->u.var.var, d->u.var.init);
-            res = transExp(venv, tenv, level, assign);
+            res.exp = T_Move(Tr_simpleVar(mem, level), e.exp);
+            S_enter(venv, d->u.var.var, E_VarEntry(mem, e.ty));
         }
-        else
-        {
-            res = transVar(venv, tenv, level, d->u.var);
-        }
-        Tr_access mem = Tr_AllocLocal(level, TRUE);
-        S_enter(venv, d->u.var.var, E_VarEntry(mem, e.ty));
         return res.exp;
     }
     break;
@@ -370,6 +355,7 @@ Tr_exp transDec(S_table venv, S_table tenv, Tr_level level, A_dec d)
         }
 
         // temp impl
+        return T_Const(0);
         assert(0);
     }
     break;
