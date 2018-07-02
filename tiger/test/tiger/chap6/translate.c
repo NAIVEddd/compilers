@@ -52,11 +52,15 @@ Tr_access Tr_AllocLocal(Tr_level level, bool escape)
 Tr_exp Tr_StaticLink(Tr_access access, Tr_level level)
 {
     Tr_exp exp = T_Temp(F_FP());
-    assert(0);
+    while(access->level != level)
+    {
+        exp = F_Exp(F_Formals(level->frame)->head, exp);
+        level = level->parent;
+    }
     return exp;
 }
 
 Tr_exp Tr_simpleVar(Tr_access access, Tr_level level)
 {
-    return F_Exp(access->access, T_Temp(F_FP()));       // local var, temp impl.
+    return F_Exp(access->access, Tr_StaticLink(access, level));       // local var, temp impl.
 }

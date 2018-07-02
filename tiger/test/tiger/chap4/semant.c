@@ -92,7 +92,7 @@ struct expty transExp(S_table venv, S_table tenv, Tr_level level, A_exp a)
     break;
     case A_intExp:
     {
-        return expTy(NULL, Ty_Int());
+        return expTy(T_Const(a->u.intt), Ty_Int());
     }
     break;
     case A_stringExp:
