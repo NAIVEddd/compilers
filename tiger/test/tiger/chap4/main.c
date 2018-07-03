@@ -3,6 +3,7 @@
 #include "semant.h"
 #include "env.h"
 #include "parse.h"
+#include "../chap7/printtree.h"
 #include <stdio.h>
 A_exp absyn_root;
 
@@ -19,6 +20,7 @@ int main()
         S_enter(venv, S_Symbol("print"), E_FunEntry(level, Temp_newlabel(), Ty_TyList(Ty_String(), NULL), Ty_Void()));
         
         struct expty ety = transExp(venv, tenv, level, MakeQueensTig());
+        // printStmList(stdout, T_StmList(T_Exp(ety.exp), NULL));
     }
 
     return 0;

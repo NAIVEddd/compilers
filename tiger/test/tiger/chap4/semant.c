@@ -244,11 +244,14 @@ struct expty transExp(S_table venv, S_table tenv, Tr_level level, A_exp a)
         S_beginScope(venv);
         S_beginScope(tenv);
         Tr_level letLevel = Tr_NewLevel(level, Temp_newlabel(), NULL);
+        T_exp decList = T_Const(0);
         for (d = a->u.let.decs; d; d = d->tail)
         {
-            transDec(venv, tenv, letLevel, d->head);
+            Tr_exp dec = transDec(venv, tenv, letLevel, d->head);
+            decList = T_Eseq(T_Exp(decList), dec);
         }
         exp = transExp(venv, tenv, letLevel, a->u.let.body);
+        exp.exp = T_Eseq(decList, exp.exp);
         S_endScope(tenv);
         S_endScope(venv);
         return exp;
@@ -335,7 +338,7 @@ Tr_exp transDec(S_table venv, S_table tenv, Tr_level level, A_dec d)
         if (d->u.var.init)
         {
             struct expty e = transExp(venv, tenv, level, d->u.var.init);
-            res.exp = T_Move(Tr_simpleVar(mem, level), e.exp);
+            res.exp = T_Eseq(T_Move(Tr_simpleVar(mem, level), e.exp), NULL);
             S_enter(venv, d->u.var.var, E_VarEntry(mem, e.ty));
         }
         return res.exp;

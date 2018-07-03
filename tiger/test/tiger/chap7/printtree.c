@@ -3,9 +3,9 @@
  *
  */
 #include <stdio.h>
-#include "util.h"
-#include "symbol.h"
-#include "temp.h"
+#include "../chap4/util.h"
+#include "../chap4/symbol.h"
+#include "../chap6/temp.h"
 #include "tree.h"
 #include "printtree.h"
 
