@@ -92,3 +92,32 @@ T_exp F_Exp(F_access acc, T_exp framePtr)
     else assert(0);     // no process if kind is inReg.
     return exp;
 }
+
+T_exp F_externalCall(string s, T_expList args)
+{
+    return T_Call(T_Name(Temp_namedlabel(s)), args);
+}
+
+F_frag F_StringFrag(Temp_label label, string str)
+{
+    F_frag frag = checked_malloc(sizeof(*frag));
+    frag->kind = F_stringFrag;
+    frag->u.stringg.label = label;
+    frag->u.stringg.str = str;
+    return frag;
+}
+F_frag F_ProcFrag(T_stm body, F_frame frame)
+{
+    F_frag frag = checked_malloc(sizeof(*frag));
+    frag->kind = F_procFrag;
+    frag->u.proc.body = body;
+    frag->u.proc.frame = frame;
+    return frag;
+}
+F_fragList F_FragList(F_frag head, F_fragList tail)
+{
+    F_fragList list = checked_malloc(sizeof(*list));
+    list->head = head;
+    list->tail = tail;
+    return list;
+}

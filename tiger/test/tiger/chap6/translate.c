@@ -64,3 +64,21 @@ Tr_exp Tr_simpleVar(Tr_access access, Tr_level level)
 {
     return F_Exp(access->access, Tr_StaticLink(access, level));       // local var, temp impl.
 }
+
+Tr_exp Tr_subscriptVar(Tr_access array, Tr_level level, Tr_exp index)
+{
+    T_exp mem = F_Exp(array->access, Tr_StaticLink(array, level));
+    return T_Mem(T_Binop(T_plus, mem, T_Binop(T_mul, T_Const(F_wordSize), index)));
+}
+
+Tr_exp Tr_String(string s)
+{
+    Temp_label lab = Temp_newlabel();
+    F_StringFrag(lab, s);
+    return T_Name(lab);
+}
+
+Tr_exp Tr_ArrayInit(Tr_exp size, Tr_exp init)
+{
+    return F_externalCall("initArray", T_ExpList(size, T_ExpList(init, NULL)));
+}

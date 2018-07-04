@@ -62,7 +62,8 @@ struct expty transVar(S_table venv, S_table tenv, Tr_level level, A_var v)
         E_enventry x = S_look(venv, v->u.subscript.var->u.simple);
         if (x && x->kind == E_varEntry)
         {
-            return expTy(NULL, x->u.var.ty);
+            struct expty i = transExp(venv, tenv, level, v->u.subscript.exp);
+            return expTy(Tr_subscriptVar(x->u.var.access, level, i.exp), actual_ty(x->u.var.ty)->u.array);
         }
         else
         {
@@ -97,7 +98,7 @@ struct expty transExp(S_table venv, S_table tenv, Tr_level level, A_exp a)
     break;
     case A_stringExp:
     {
-        return expTy(NULL, Ty_String());
+        return expTy(Tr_String(a->u.stringg), Ty_String());
     }
     break;
     case A_callExp:
@@ -262,7 +263,7 @@ struct expty transExp(S_table venv, S_table tenv, Tr_level level, A_exp a)
         Ty_ty varT = S_look(tenv, a->u.array.typ);
         struct expty expSz = transExp(venv, tenv, level, a->u.array.size);
         struct expty expInit = transExp(venv, tenv, level, a->u.array.init);
-        return expTy(NULL, varT);
+        return expTy(Tr_ArrayInit(expSz.exp, expInit.exp), varT);
     }
     break;
     default:
