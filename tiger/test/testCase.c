@@ -166,7 +166,7 @@ A_exp MakeQueensTig()
 
     A_exp eif_try2 = A_IfExp(++nilPos, eif_AllTrue, A_SeqExp(++nilPos, A_ExpList(eass_row1, A_ExpList(eass_diagrc1, A_ExpList(eass_diagr7c1, A_ExpList(eass_colr, A_ExpList(ecall_tryrp1, A_ExpList(eass_row0, A_ExpList(eass_diagrc0, A_ExpList(eass_diagr7c0, NULL))))))))), NULL);
     A_exp efor_tryR = A_ForExp(++nilPos, s_r, ei_0, op_nm1, eif_try2);
-    A_exp eif_try1 = A_IfExp(++nilPos, op_cN, A_CallExp(++nilPos, s_try, NULL), efor_tryR);
+    A_exp eif_try1 = A_IfExp(++nilPos, op_cN, A_CallExp(++nilPos, s_printboard, NULL), efor_tryR);
     A_fundec df_try = A_Fundec(++nilPos, s_try, A_FieldList(A_Field(++nilPos, s_c, s_int),NULL), S_Symbol("void"), eif_try1);
 
     return A_LetExp(++nilPos, A_DecList(dv_N, A_DecList(dt_intArray, A_DecList(dv_row, A_DecList(dv_col, A_DecList(dv_diag1, A_DecList(dv_diag2, A_DecList(A_FunctionDec(++nilPos, A_FundecList(df_printboard, A_FundecList(df_try, NULL))), NULL))))))),
