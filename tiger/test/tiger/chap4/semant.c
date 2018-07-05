@@ -108,9 +108,14 @@ struct expty transExp(S_table venv, S_table tenv, Tr_level level, A_exp a)
         {
             Ty_tyList paramT = x->u.fun.formals;
             A_expList paramV = a->u.call.args;
+            Tr_access static_link = Tr_Formals(x->u.fun.level)->head;
+            T_expList args = T_ExpList(Tr_simpleVar(static_link, x->u.fun.level), NULL);
+            T_expList* tail = &(args->tail);
             for (; paramT && paramV; paramT = paramT->tail, paramV = paramV->tail)
             {
                 struct expty vT = transExp(venv, tenv, level, paramV->head);
+                *tail = T_ExpList(vT.exp, NULL);
+                tail = (*tail)->tail;
                 if (paramT->head->kind != vT.ty->kind)
                     break;
             }
@@ -119,7 +124,7 @@ struct expty transExp(S_table venv, S_table tenv, Tr_level level, A_exp a)
                 EM_error(a->pos, "func %s args not matched.", a->u.call.func);
                 return expTy(NULL, x->u.fun.result);
             }
-            return expTy(NULL, x->u.fun.result);
+            return expTy(T_Call(T_Name(x->u.fun.label), args), x->u.fun.result);
         }
     }
     break;

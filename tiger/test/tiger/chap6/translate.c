@@ -27,16 +27,16 @@ Tr_level Tr_NewLevel(Tr_level parent, Temp_label name, U_boolList formals)
 
 Tr_accessList Tr_Formals(Tr_level level)
 {
-    F_accessList list = F_Formals(level->frame)->tail;
+    F_accessList list = F_Formals(level->frame);
     Tr_accessList tr_list = NULL;
-    for(Tr_accessList db = tr_list; list; list= list->tail, db = db->tail)
+    for(Tr_accessList* db = &tr_list; list; list= list->tail, db = &(*db)->tail)
     {
-        db = checked_malloc(sizeof(struct Tr_accessList_));
+        *db = checked_malloc(sizeof(struct Tr_accessList_));
         Tr_access mem = checked_malloc(sizeof(struct Tr_access_));
         mem->level = level;
         mem->access = list->head;
-        db->head = mem;
-        db->tail = NULL;
+        (*db)->head = mem;
+        (*db)->tail = NULL;
     }
     return tr_list;
 }
