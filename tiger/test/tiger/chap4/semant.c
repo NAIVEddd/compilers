@@ -21,7 +21,7 @@ struct expty transVar(S_table venv, S_table tenv, Tr_level level, A_var v)
         E_enventry x = S_look(venv, v->u.simple);
         if (x && x->kind == E_varEntry)
         {
-            return expTy(NULL, actual_ty(x->u.var.ty));
+            return expTy(Tr_simpleVar(x->u.var.access, level), actual_ty(x->u.var.ty));
         }
         else
         {
@@ -227,16 +227,22 @@ struct expty transExp(S_table venv, S_table tenv, Tr_level level, A_exp a)
     break;
     case A_forExp:
     {
-        S_beginScope(venv);
-        Tr_level forLevel = Tr_NewLevel(level, Temp_newlabel(), NULL);
-        A_dec dec_var = A_VarDec(a->pos, a->u.forr.var, NULL, a->u.forr.lo);
-        transDec(venv, tenv, forLevel, dec_var);
+        S_symbol limit = Temp_newlabel();
+        A_decList var_defs = A_DecList(A_VarDec(a->pos, a->u.forr.var, NULL, a->u.forr.lo), A_DecList(A_VarDec(a->pos, limit, NULL, a->u.forr.hi), NULL));
+        A_exp let_exp = A_LetExp(a->pos, var_defs,
+            A_WhileExp(a->pos, A_OpExp(a->pos, A_leOp, A_VarExp(a->pos, A_SimpleVar(a->pos, a->u.forr.var)), A_VarExp(a->pos, A_SimpleVar(a->pos, limit))),
+            A_SeqExp(a->pos, A_ExpList(a->u.forr.body, A_ExpList(A_OpExp(a->pos, A_plusOp, A_VarExp(a->pos, A_SimpleVar(a->pos, a->u.forr.var)), A_IntExp(a->pos, 1)), NULL)))));
 
-        struct expty loT = transExp(venv, tenv, forLevel, a->u.forr.lo);
-        struct expty hiT = transExp(venv, tenv, forLevel, a->u.forr.hi);
-        struct expty bodyT = transExp(venv, tenv, forLevel, a->u.forr.body);
-        S_endScope(venv);
-        return bodyT;
+        // S_beginScope(venv);
+        // Tr_level forLevel = Tr_NewLevel(level, Temp_newlabel(), NULL);
+        // A_dec dec_var = ;
+        // transDec(venv, tenv, forLevel, dec_var);
+
+        // struct expty loT = transExp(venv, tenv, forLevel, a->u.forr.lo);
+        // struct expty hiT = transExp(venv, tenv, forLevel, a->u.forr.hi);
+        // struct expty bodyT = transExp(venv, tenv, forLevel, a->u.forr.body);
+        // S_endScope(venv);
+        return transExp(venv, tenv, level, let_exp);
     }
     break;
     case A_breakExp:
@@ -250,7 +256,7 @@ struct expty transExp(S_table venv, S_table tenv, Tr_level level, A_exp a)
         S_beginScope(venv);
         S_beginScope(tenv);
         Tr_level letLevel = Tr_NewLevel(level, Temp_newlabel(), NULL);
-        T_exp decList = T_Const(0);
+        T_exp decList = T_Const(0); // T_Eseq
         for (d = a->u.let.decs; d; d = d->tail)
         {
             Tr_exp dec = transDec(venv, tenv, letLevel, d->head);

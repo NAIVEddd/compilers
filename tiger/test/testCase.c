@@ -129,6 +129,7 @@ A_exp MakeQueensTig()
     S_symbol s_try = S_Symbol("try");
     A_var v_N = A_SimpleVar(++nilPos, s_N);
     A_exp ei_0 = A_IntExp(++nilPos, 0);
+    A_exp ei_1 = A_IntExp(++nilPos, 1);
 
     A_dec dv_N = A_VarDec(++nilPos, s_N, NULL, A_IntExp(++nilPos, 8));
     A_dec dt_intArray = A_TypeDec(++nilPos, A_NametyList(A_Namety(s_intArray, A_ArrayTy(++nilPos, s_int)), NULL));
@@ -138,7 +139,7 @@ A_exp MakeQueensTig()
     A_dec dv_diag1 = A_VarDec(++nilPos, s_diag1, NULL, A_ArrayExp(++nilPos, s_intArray, op_nnm1, ei_0));
     A_dec dv_diag2 = A_VarDec(++nilPos, s_diag2, NULL, A_ArrayExp(++nilPos, s_intArray, op_nnm1, ei_0));
 
-    A_exp op_nm1 = A_OpExp(++nilPos, A_minusOp, A_VarExp(++nilPos, v_N), ei_0);
+    A_exp op_nm1 = A_OpExp(++nilPos, A_minusOp, A_VarExp(++nilPos, v_N), ei_1);
     A_exp eif_print = A_IfExp(++nilPos, A_OpExp(++nilPos, A_eqOp, A_VarExp(++nilPos, A_SubscriptVar(++nilPos, A_SimpleVar(++nilPos, s_col), A_VarExp(++nilPos, A_SimpleVar(++nilPos, s_i)))), A_VarExp(++nilPos, A_SimpleVar(++nilPos, s_j))),
         A_StringExp(++nilPos, " O"), A_StringExp(++nilPos, " ."));
     A_exp ecall_print = A_CallExp(++nilPos, s_print, A_ExpList(eif_print, NULL));
@@ -154,7 +155,6 @@ A_exp MakeQueensTig()
     A_exp op_diagr7c0 = A_OpExp(++nilPos, A_eqOp, A_VarExp(++nilPos, A_SubscriptVar(++nilPos, A_SimpleVar(++nilPos, s_diag2), op_r7c)), ei_0);
     A_exp eif_AllTrue = A_IfExp(++nilPos, op_rowr_0, A_IfExp(++nilPos, op_diagrc_0, op_diagr7c0, A_IntExp(++nilPos, 0)), A_IntExp(++nilPos, 0));
 
-    A_exp ei_1 = A_IntExp(++nilPos, 1);
     A_exp eass_row1 = A_AssignExp(++nilPos, A_SubscriptVar(++nilPos, A_SimpleVar(++nilPos, s_row), A_VarExp(++nilPos, A_SimpleVar(++nilPos, s_r))), ei_1);
     A_exp eass_diagrc1 = A_AssignExp(++nilPos, A_SubscriptVar(++nilPos, A_SimpleVar(++nilPos, s_diag1), op_rpc), ei_1);
     A_exp eass_diagr7c1 = A_AssignExp(++nilPos, A_SubscriptVar(++nilPos, A_SimpleVar(++nilPos, s_diag2), op_r7c), ei_1);
