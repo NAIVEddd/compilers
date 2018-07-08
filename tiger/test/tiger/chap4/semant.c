@@ -110,7 +110,7 @@ struct expty transExp(S_table venv, S_table tenv, Tr_level level, A_exp a)
             A_expList paramV = a->u.call.args;
             Tr_access static_link = Tr_Formals(x->u.fun.level)->head;
             T_expList args = T_ExpList(Tr_simpleVar(static_link, x->u.fun.level), NULL);
-            T_expList* tail = &(args->tail);
+            T_expList *tail = &(args->tail);
             for (; paramT && paramV; paramT = paramT->tail, paramV = paramV->tail)
             {
                 struct expty vT = transExp(venv, tenv, level, paramV->head);
@@ -135,11 +135,23 @@ struct expty transExp(S_table venv, S_table tenv, Tr_level level, A_exp a)
         switch (a->u.op.oper)
         {
         case A_plusOp:
+        {
+            return expTy(T_Binop(T_plus, left.exp, right.exp), Ty_Int());
+        }
+        break;
         case A_minusOp:
+        {
+            return expTy(T_Binop(T_minus, left.exp, right.exp), Ty_Int());
+        }
+        break;
         case A_timesOp:
+        {
+            return expTy(T_Binop(T_mul, left.exp, right.exp), Ty_Int());
+        }
+        break;
         case A_divideOp:
         {
-            return expTy(NULL, Ty_Int());
+            return expTy(T_Binop(T_div, left.exp, right.exp), Ty_Int());
         }
         break;
         default:
@@ -230,8 +242,8 @@ struct expty transExp(S_table venv, S_table tenv, Tr_level level, A_exp a)
         S_symbol limit = Temp_newlabel();
         A_decList var_defs = A_DecList(A_VarDec(a->pos, a->u.forr.var, NULL, a->u.forr.lo), A_DecList(A_VarDec(a->pos, limit, NULL, a->u.forr.hi), NULL));
         A_exp let_exp = A_LetExp(a->pos, var_defs,
-            A_WhileExp(a->pos, A_OpExp(a->pos, A_leOp, A_VarExp(a->pos, A_SimpleVar(a->pos, a->u.forr.var)), A_VarExp(a->pos, A_SimpleVar(a->pos, limit))),
-            A_SeqExp(a->pos, A_ExpList(a->u.forr.body, A_ExpList(A_OpExp(a->pos, A_plusOp, A_VarExp(a->pos, A_SimpleVar(a->pos, a->u.forr.var)), A_IntExp(a->pos, 1)), NULL)))));
+                                 A_WhileExp(a->pos, A_OpExp(a->pos, A_leOp, A_VarExp(a->pos, A_SimpleVar(a->pos, a->u.forr.var)), A_VarExp(a->pos, A_SimpleVar(a->pos, limit))),
+                                            A_SeqExp(a->pos, A_ExpList(a->u.forr.body, A_ExpList(A_OpExp(a->pos, A_plusOp, A_VarExp(a->pos, A_SimpleVar(a->pos, a->u.forr.var)), A_IntExp(a->pos, 1)), NULL)))));
 
         // S_beginScope(venv);
         // Tr_level forLevel = Tr_NewLevel(level, Temp_newlabel(), NULL);
@@ -344,7 +356,7 @@ Tr_exp transDec(S_table venv, S_table tenv, Tr_level level, A_dec d)
         {
             assert(0);
         }
-        
+
         Tr_access mem = Tr_AllocLocal(level, TRUE);
         struct expty res;
         if (d->u.var.init)
