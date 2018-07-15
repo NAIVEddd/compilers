@@ -57,8 +57,8 @@ temp.o: ../chap6/temp.c
 util.o: util.c util.h
 	cc -g -c util.c
 	
-testCase.o: symbol.o
-	cc -g -c ../../testCase.c symbol.o
+testCase.o: ../../testCase.c
+	cc -g -c ../../testCase.c
 
 symbol.o: symbol.c table.h util.h
 	cc -g -c symbol.c

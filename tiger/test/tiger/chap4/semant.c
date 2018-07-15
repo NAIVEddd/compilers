@@ -156,7 +156,48 @@ struct expty transExp(S_table venv, S_table tenv, Tr_level level, A_exp a)
         break;
         default:
         {
-            return expTy(NULL, Ty_Int());
+            Temp_label t = Temp_newlabel(), f = Temp_newlabel();
+            T_exp t_exp = T_Const(1), f_exp = T_Const(0);
+            T_relOp op;
+            switch(a->u.op.oper)
+            {
+                case A_eqOp:
+                {
+                    op = T_eq;
+                }
+                break;
+                case A_neqOp:
+                {
+                    op = T_ne;
+                }
+                break;
+                case A_ltOp:
+                {
+                    op = T_lt;
+                }
+                break;
+                case A_leOp:
+                {
+                    op = T_le;
+                }
+                break;
+                case A_gtOp:
+                {
+                    op = T_gt;
+                }
+                break;
+                case A_geOp:
+                {
+                    op = T_ge;
+                }
+                break;
+                default:
+                    assert(0);
+                    break;
+            }
+
+            T_stm t_stm = T_Seq(T_Label(t), T_Exp(t_exp)), f_stm = T_Seq(T_Label(f), T_Exp(f_exp));
+            return expTy(T_Eseq(T_Seq(T_Cjump(op, left.exp, right.exp, t, f), T_Seq(t_stm, f_stm)), T_Const(0)), Ty_Int());
         }
         }
     }
@@ -200,30 +241,26 @@ struct expty transExp(S_table venv, S_table tenv, Tr_level level, A_exp a)
     break;
     case A_ifExp:
     {
-        struct expty testT = transExp(venv, tenv, level, a->u.iff.test);
-        if (testT.ty->kind != Ty_int)
+        Temp_label t = Temp_newlabel();
+        Temp_label f = Temp_newlabel();
+        Temp_label if_end = Temp_newlabel();
+        struct expty test_left = transExp(venv, tenv, level, a->u.iff.test);
+        T_exp test_right = T_Const(0);
+        T_stm test = T_Cjump(T_eq, test_left.exp, test_right, t, f);
+        struct expty if_then = transExp(venv, tenv, level, a->u.iff.then);
+        T_stm then = T_Seq(T_Label(t), T_Seq(T_Exp(if_then.exp), T_Jump(T_Name(if_end), Temp_LabelList(if_end, NULL))));
+        T_stm elsee = NULL;
+        if (a->u.iff.elsee == NULL)
         {
-            printf("if test exp must been int exp.\n");
-            return expTy(NULL, Ty_Nil());
-        }
-        if (a->u.iff.then == NULL)
-        {
-            printf("if exp must have then exp.\n");
-            return expTy(NULL, Ty_Nil());
-        }
-        struct expty thenT = transExp(venv, tenv, level, a->u.iff.then);
-        struct expty elseT = thenT;
-        if (a->u.iff.elsee)
-            elseT = transExp(venv, tenv, level, a->u.iff.elsee);
-        if (thenT.ty->kind == elseT.ty->kind) // actual_ty(then) == actual_ty(else)
-        {
-            thenT.exp = NULL;
-            return thenT;
+            elsee = T_Seq(T_Label(f), T_Seq(T_Exp(T_Const(0)), T_Jump(T_Name(if_end), Temp_LabelList(if_end, NULL))));
         }
         else
         {
-            return expTy(NULL, Ty_Nil());
+            struct expty if_else = transExp(venv, tenv, level, a->u.iff.elsee);
+            elsee = T_Seq(T_Label(f), T_Seq(T_Exp(if_else.exp), T_Jump(T_Name(if_end), Temp_LabelList(if_end, NULL))));
         }
+        T_exp result = T_Eseq(T_Seq(test, T_Seq(then, T_Seq(elsee, T_Label(if_end)))), T_Const(0));
+        return expTy(result, if_then.ty);
     }
     break;
     case A_whileExp:
