@@ -88,12 +88,12 @@ struct expty transExp(S_table venv, S_table tenv, Tr_level level, A_exp a)
     break;
     case A_nilExp:
     {
-        return expTy(NULL, Ty_Nil());
+        return expTy(T_Const(0), Ty_Nil());   // todo: should't use T_Const(0).
     }
     break;
     case A_intExp:
     {
-        return expTy(T_Const(a->u.intt), Ty_Int());
+        return expTy(Tr_int(a->u.intt), Ty_Int());
     }
     break;
     case A_stringExp:

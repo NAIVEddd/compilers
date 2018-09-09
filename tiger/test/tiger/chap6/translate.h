@@ -20,5 +20,6 @@ Tr_access Tr_AllocLocal(Tr_level level, bool escape);
 Tr_exp Tr_simpleVar(Tr_access , Tr_level);
 Tr_exp Tr_subscriptVar(Tr_access array, Tr_level level, Tr_exp index);
 Tr_exp Tr_String(string s);
+Tr_exp Tr_int(int num);
 
 Tr_exp Tr_ArrayInit(Tr_exp size, Tr_exp init);

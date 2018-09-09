@@ -78,6 +78,11 @@ Tr_exp Tr_String(string s)
     return T_Name(lab);
 }
 
+Tr_exp Tr_int(int num)
+{
+    return T_Const(num);
+}
+
 Tr_exp Tr_ArrayInit(Tr_exp size, Tr_exp init)
 {
     return F_externalCall("initArray", T_ExpList(size, T_ExpList(init, NULL)));
