@@ -16,6 +16,7 @@ Tr_level Tr_Outermost();
 Tr_level Tr_NewLevel(Tr_level parent, Temp_label name, U_boolList formals);
 Tr_accessList Tr_Formals(Tr_level level);
 Tr_access Tr_AllocLocal(Tr_level level, bool escape);
+Tr_exp Tr_StaticLink(Tr_access access, Tr_level level);
 
 Tr_exp Tr_simpleVar(Tr_access , Tr_level);
 Tr_exp Tr_subscriptVar(Tr_access array, Tr_level level, Tr_exp index);

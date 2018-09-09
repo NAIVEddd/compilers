@@ -17,6 +17,7 @@ F_accessList F_Formals(F_frame f);
 F_access F_AllocLocal(F_frame f, bool escape);
 
 Temp_temp F_FP(void);
+Temp_temp F_RV(void);
 extern const int F_wordSize;
 T_exp F_Exp(F_access acc, T_exp framePtr);
 

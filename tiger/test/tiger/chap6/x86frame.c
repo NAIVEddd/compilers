@@ -83,6 +83,15 @@ Temp_temp F_FP(void)
     }
     return fp;
 }
+Temp_temp F_RV(void)
+{
+    static Temp_temp rv = NULL;
+    if(rv == NULL)
+    {
+        rv = Temp_newtemp();
+    }
+    return rv;
+}
 const int F_wordSize = 4;
 
 T_exp F_Exp(F_access acc, T_exp framePtr)

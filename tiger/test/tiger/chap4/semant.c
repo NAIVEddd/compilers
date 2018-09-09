@@ -108,14 +108,16 @@ struct expty transExp(S_table venv, S_table tenv, Tr_level level, A_exp a)
         {
             Ty_tyList paramT = x->u.fun.formals;
             A_expList paramV = a->u.call.args;
-            Tr_access static_link = Tr_Formals(x->u.fun.level)->head;
-            T_expList args = T_ExpList(Tr_simpleVar(static_link, x->u.fun.level), NULL);
+            Tr_level func_level = Tr_NewLevel(level, Temp_newlabel(), NULL);
+            Tr_access fp = Tr_Formals(func_level)->head;
+            T_exp static_link = Tr_StaticLink(fp, func_level);
+            T_expList args = T_ExpList(static_link, NULL);
             T_expList *tail = &(args->tail);
             for (; paramT && paramV; paramT = paramT->tail, paramV = paramV->tail)
             {
-                struct expty vT = transExp(venv, tenv, level, paramV->head);
+                struct expty vT = transExp(venv, tenv, func_level, paramV->head);
                 *tail = T_ExpList(vT.exp, NULL);
-                tail = (*tail)->tail;
+                tail = &((*tail)->tail);
                 if (paramT->head->kind != vT.ty->kind)
                     break;
             }
@@ -312,7 +314,7 @@ struct expty transExp(S_table venv, S_table tenv, Tr_level level, A_exp a)
             decList = T_Eseq(T_Exp(decList), dec);
         }
         exp = transExp(venv, tenv, letLevel, a->u.let.body);
-        exp.exp = T_Eseq(decList, exp.exp);
+        exp.exp = T_Eseq(T_Exp(decList), exp.exp);
         S_endScope(tenv);
         S_endScope(venv);
         return exp;
