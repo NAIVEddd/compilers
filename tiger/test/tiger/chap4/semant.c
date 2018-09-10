@@ -220,10 +220,20 @@ struct expty transExp(S_table venv, S_table tenv, Tr_level level, A_exp a)
     case A_seqExp:
     {
         struct expty res = expTy(NULL, Ty_Nil());
+        T_stm stm = NULL, *stmTail = &stm;
         for (A_expList exps = a->u.seq; exps; exps = exps->tail)
         {
             res = transExp(venv, tenv, level, exps->head);
+            if(*stmTail == NULL)
+            {
+                *stmTail = T_Exp(res.exp);
+            }
+            else
+            {
+                *stmTail = T_Seq(*stmTail, T_Exp(res.exp));
+            }
         }
+        res.exp = T_Eseq(stm, T_Const(0));
         return res;
     }
     break;
