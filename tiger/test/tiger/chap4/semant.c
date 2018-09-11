@@ -250,6 +250,11 @@ struct expty transExp(S_table venv, S_table tenv, Tr_level level, A_exp a)
     break;
     case A_ifExp:
     {
+        // test is binOpExp 
+        // if test true, goto true label, then exec then body and goto end label
+        // if test false, goto false label, then exec else body and goto end label
+        // ifExp don't return a value.
+
         Temp_label t = Temp_newlabel();
         Temp_label f = Temp_newlabel();
         Temp_label if_end = Temp_newlabel();
