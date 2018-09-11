@@ -97,7 +97,7 @@ const int F_wordSize = 4;
 T_exp F_Exp(F_access acc, T_exp framePtr)
 {
     T_exp exp = NULL;
-    if(acc->kind == inFrame) exp = T_Mem(T_Binop(T_plus, T_Const(acc->u.offset), framePtr));
+    if(acc->kind == inFrame) exp = T_Mem(T_Binop(T_plus, framePtr, T_Const(acc->u.offset)));
     else assert(0);     // no process if kind is inReg.
     return exp;
 }

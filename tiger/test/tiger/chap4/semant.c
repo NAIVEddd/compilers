@@ -225,13 +225,9 @@ struct expty transExp(S_table venv, S_table tenv, Tr_level level, A_exp a)
         {
             res = transExp(venv, tenv, level, exps->head);
             if(*stmTail == NULL)
-            {
                 *stmTail = T_Exp(res.exp);
-            }
             else
-            {
                 *stmTail = T_Seq(*stmTail, T_Exp(res.exp));
-            }
         }
         res.exp = T_Eseq(stm, T_Const(0));
         return res;
@@ -243,10 +239,11 @@ struct expty transExp(S_table venv, S_table tenv, Tr_level level, A_exp a)
         struct expty exp = transExp(venv, tenv, level, a->u.assign.exp);
         if (var.ty == exp.ty)
         {
-            return expTy(NULL, var.ty); // should be call actual_ty()?
+            return expTy(T_Eseq(T_Move(var.exp, exp.exp), T_Const(0)), var.ty); // should be call actual_ty()?
         }
         else
         {
+            assert(0);
             return expTy(NULL, Ty_Nil());
         }
     }
