@@ -308,14 +308,14 @@ struct expty transExp(S_table venv, S_table tenv, Tr_level level, A_exp a)
         T_stm then = T_Seq(T_Label(t), 
                         T_Seq(T_Exp(if_then.exp), 
                             T_Seq(T_Jump(T_Name(if_end), Temp_LabelList(if_end, NULL)), 
-                                    T_Label(if_end))));
+                                    T_Exp(T_Const(0)))));
         T_stm elsee = NULL;
         if (a->u.iff.elsee == NULL)
         {
             elsee = T_Seq(T_Label(f), 
                         T_Seq(T_Exp(T_Const(0)),
                             T_Seq(T_Jump(T_Name(if_end), Temp_LabelList(if_end, NULL)),
-                                T_Label(if_end))));
+                                T_Exp(T_Const(0)))));
         }
         else
         {
@@ -324,9 +324,10 @@ struct expty transExp(S_table venv, S_table tenv, Tr_level level, A_exp a)
             elsee = T_Seq(T_Label(f),
                         T_Seq(T_Exp(if_else.exp),
                             T_Seq(T_Jump(T_Name(if_end), Temp_LabelList(if_end, NULL)),
-                                T_Label(if_end))));
+                                T_Exp(T_Const(0)))));
         }
-        T_exp result = T_Eseq(T_Seq(test, T_Seq(then, elsee)), T_Const(0));
+        T_exp result = T_Eseq(T_Seq(test, T_Seq(then, elsee)), 
+                                T_Eseq(T_Label(if_end), T_Const(0)));
         return expTy(result, if_then.ty);
     }
     break;
@@ -435,7 +436,7 @@ Tr_exp transDec(S_table venv, S_table tenv, Tr_level level, A_dec d)
             Ty_tyList formalTys = makeFormalTyList(tenv, f->params);
             S_enter(venv, f->name, E_FunEntry(level, Temp_newlabel(), formalTys, resultTy));
         }
-
+    
         for (A_fundecList fl = d->u.function; fl; fl = fl->tail)
         {
             A_fundec f = fl->head;
@@ -450,7 +451,7 @@ Tr_exp transDec(S_table venv, S_table tenv, Tr_level level, A_dec d)
                     S_enter(venv, l->head->name, E_VarEntry(varLocate, t->head));
                 }
             }
-            transExp(venv, tenv, level, f->body);
+            return transExp(venv, tenv, level, f->body).exp;
             S_endScope(venv);
         }
 
