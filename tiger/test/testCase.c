@@ -152,8 +152,8 @@ A_exp MakeQueensTig()
         A_StringExp(34, " O"), A_StringExp(35, " ."));
     A_exp ecall_print = A_CallExp(36, s_print, A_ExpList(eif_print, NULL));
     A_exp efor_printboardJ = A_ForExp(37, s_j, ei_0, op_nm1, ecall_print);
-    A_exp efor_printboardI = A_ForExp(38, s_i, ei_0, op_nm1, A_SeqExp(39, A_ExpList(efor_printboardJ, A_ExpList(A_CallExp(40, s_print, A_ExpList(A_StringExp(41, "\\n"), NULL)), NULL))));
-    A_fundec df_printboard = A_Fundec(42, s_printboard, NULL, S_Symbol("void"), efor_printboardI);
+    A_exp efor_printboardI = A_ForExp(38, s_i, ei_0, op_nm1, A_SeqExp(39, A_ExpList(efor_printboardJ, A_ExpList(A_CallExp(40, s_print, A_ExpList(A_StringExp(41, "\\n"), NULL)), A_ExpList(A_CallExp(41, s_print, A_ExpList(A_StringExp(42, "\\n"), NULL)), NULL)))));
+    A_fundec df_printboard = A_Fundec(43, s_printboard, NULL, S_Symbol("void"), efor_printboardI);
 
 /*
     function try(c:int) = 

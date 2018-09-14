@@ -77,6 +77,49 @@ struct expty transVar(S_table venv, S_table tenv, Tr_level level, A_var v)
         break;
     }
 }
+
+T_relOp transRelOp(A_oper oper)
+{
+    T_relOp op;
+    switch (oper)
+    {
+        case A_eqOp:
+        {
+            op = T_eq;
+        }
+        break;
+        case A_neqOp:
+        {
+            op = T_ne;
+        }
+        break;
+        case A_ltOp:
+        {
+            op = T_lt;
+        }
+        break;
+        case A_leOp:
+        {
+            op = T_le;
+        }
+        break;
+        case A_gtOp:
+        {
+            op = T_gt;
+        }
+        break;
+        case A_geOp:
+        {
+            op = T_ge;
+        }
+        break;
+        default:
+            assert(0);
+            break;
+    }
+    return op;
+}
+
 struct expty transExp(S_table venv, S_table tenv, Tr_level level, A_exp a)
 {
     switch (a->kind)
@@ -250,53 +293,13 @@ struct expty transExp(S_table venv, S_table tenv, Tr_level level, A_exp a)
     break;
     case A_ifExp:
     {
-        // test is binOpExp
-        // if test true, goto true label, then exec then body and goto end label
-        // if test false, goto false label, then exec else body and goto end label
-        // ifExp don't return a value.
-
-        T_relOp op;
         if (a->u.iff.test->kind != A_opExp)
         {
             assert(0);
         }
+        T_relOp op = transRelOp(a->u.iff.test->u.op.oper);
 
-        switch (a->u.iff.test->u.op.oper)
-        {
-            case A_eqOp:
-            {
-                op = T_eq;
-            }
-            break;
-            case A_neqOp:
-            {
-                op = T_ne;
-            }
-            break;
-            case A_ltOp:
-            {
-                op = T_lt;
-            }
-            break;
-            case A_leOp:
-            {
-                op = T_le;
-            }
-            break;
-            case A_gtOp:
-            {
-                op = T_gt;
-            }
-            break;
-            case A_geOp:
-            {
-                op = T_ge;
-            }
-            break;
-            default:
-                assert(0);
-                break;
-        }
+        
         struct expty left = transExp(venv, tenv, level, a->u.iff.test->u.op.left);
         struct expty right = transExp(venv, tenv, level, a->u.iff.test->u.op.right);
 
@@ -333,13 +336,24 @@ struct expty transExp(S_table venv, S_table tenv, Tr_level level, A_exp a)
     break;
     case A_whileExp:
     {
-        struct expty testT = transExp(venv, tenv, level, a->u.whilee.test);
-        if (testT.ty->kind != Ty_int)
-        {
-            printf("while test exp must been int exp.\n");
-            return expTy(NULL, Ty_Nil());
-        }
-        return transExp(venv, tenv, level, a->u.whilee.body);
+        struct expty result; result.ty = Ty_Nil();
+
+        Temp_label testLabel = Temp_newlabel(), bodyLabel = Temp_newlabel(), endLabel = Temp_newlabel();
+        T_relOp op = transRelOp(a->u.whilee.test->u.op.oper);
+        struct expty left = transExp(venv, tenv, level, a->u.whilee.test->u.op.left);
+        struct expty right = transExp(venv, tenv, level, a->u.whilee.test->u.op.right);
+        struct expty body = transExp(venv, tenv, level, a->u.whilee.body);
+
+        result.exp = T_Eseq(
+                        T_Seq(T_Jump(T_Name(testLabel), Temp_LabelList(testLabel, NULL)),
+                            T_Seq(T_Label(bodyLabel),
+                                T_Seq(T_Exp(body.exp),
+                                    T_Seq(T_Label(testLabel),
+                                        T_Seq(T_Cjump(op, left.exp, right.exp, bodyLabel, endLabel),
+                                            T_Label(endLabel)))))), 
+                        T_Const(0));
+
+        return result;
     }
     break;
     case A_forExp:
@@ -350,15 +364,6 @@ struct expty transExp(S_table venv, S_table tenv, Tr_level level, A_exp a)
                                  A_WhileExp(a->pos, A_OpExp(a->pos, A_leOp, A_VarExp(a->pos, A_SimpleVar(a->pos, a->u.forr.var)), A_VarExp(a->pos, A_SimpleVar(a->pos, limit))),
                                             A_SeqExp(a->pos, A_ExpList(a->u.forr.body, A_ExpList(A_OpExp(a->pos, A_plusOp, A_VarExp(a->pos, A_SimpleVar(a->pos, a->u.forr.var)), A_IntExp(a->pos, 1)), NULL)))));
 
-        // S_beginScope(venv);
-        // Tr_level forLevel = Tr_NewLevel(level, Temp_newlabel(), NULL);
-        // A_dec dec_var = ;
-        // transDec(venv, tenv, forLevel, dec_var);
-
-        // struct expty loT = transExp(venv, tenv, forLevel, a->u.forr.lo);
-        // struct expty hiT = transExp(venv, tenv, forLevel, a->u.forr.hi);
-        // struct expty bodyT = transExp(venv, tenv, forLevel, a->u.forr.body);
-        // S_endScope(venv);
         return transExp(venv, tenv, level, let_exp);
     }
     break;
