@@ -3,10 +3,9 @@
  *
  */
 #include <stdio.h>
-#include "util.h"
-#include "symbol.h"
-#include "temp.h"
-#include "tree.h"
+#include "../chap4/util.h"
+#include "../chap4/symbol.h"
+#include "../chap6/temp.h"
 #include "canon.h"
 
 typedef struct expRefList_ *expRefList;
@@ -55,8 +54,8 @@ static T_stm reorder(expRefList rlist) {
       struct stmExp hd = do_exp(*rlist->head);
       T_stm s = reorder(rlist->tail);
       if (commute(s,hd.e)) {
-	 *rlist->head=hd.e;
-         return seq(hd.s,s);
+	      *rlist->head=hd.e;
+        return seq(hd.s,s);
       } else {
         Temp_temp t = Temp_newtemp();
         *rlist->head=T_Temp(t);

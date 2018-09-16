@@ -3,6 +3,9 @@
  *           basic blocks and traces.
  *
  */
+#pragma once
+#include"../chap7/tree.h"
+
 typedef struct C_stmListList_ *C_stmListList;
 struct C_block { C_stmListList stmLists; Temp_label label;};
 struct C_stmListList_ { T_stmList head; C_stmListList tail;};
