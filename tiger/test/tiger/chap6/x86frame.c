@@ -130,3 +130,5 @@ F_fragList F_FragList(F_frag head, F_fragList tail)
     list->tail = tail;
     return list;
 }
+
+Temp_map F_tempMap = NULL;

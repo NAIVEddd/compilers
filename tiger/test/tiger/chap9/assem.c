@@ -6,14 +6,14 @@
 #include <stdio.h>
 #include <stdlib.h> /* for atoi */
 #include <string.h> /* for strcpy */
-#include "util.h"
-#include "symbol.h"
-#include "absyn.h"
-#include "temp.h"
-#include "tree.h"
+#include "../chap4/util.h"
+#include "../chap4/symbol.h"
+#include "../chap4/absyn.h"
+#include "../chap6/temp.h"
+#include "../chap7/tree.h"
 #include "assem.h"
-#include "frame.h"
-#include "errormsg.h"
+#include "../chap6/frame.h"
+#include "../chap4/errormsg.h"
 
 AS_targets AS_Targets(Temp_labelList labels) {
    AS_targets p = checked_malloc (sizeof *p);

@@ -21,8 +21,8 @@
 #lex.yy.c: tiger.lex
 #	lex tiger.lex
 
-a.out: absyn.o x86frame.o semant.o symbol.o table.o util.o testCase.o env.o types.o errormsg.o translate.o temp.o main.c y.tab.o lex.yy.o parse.o tree.o printtree.o canon.o
-	cc -g absyn.o x86frame.o semant.o symbol.o table.o util.o testCase.o env.o types.o errormsg.o translate.o temp.o main.c y.tab.o lex.yy.o parse.o tree.o printtree.o canon.o
+a.out: absyn.o x86frame.o semant.o symbol.o table.o util.o testCase.o env.o types.o errormsg.o translate.o temp.o main.c y.tab.o lex.yy.o parse.o tree.o printtree.o canon.o codegen.o assem.o
+	cc -g absyn.o x86frame.o semant.o symbol.o table.o util.o testCase.o env.o types.o errormsg.o translate.o temp.o main.c y.tab.o lex.yy.o parse.o tree.o printtree.o canon.o codegen.o assem.o
 
 y.tab.o: y.tab.c
 	cc -g -c y.tab.c
@@ -83,6 +83,12 @@ printtree.o: ../chap7/printtree.c
 
 canon.o : ../chap8/canon.c
 	cc -g -c ../chap8/canon.c
+
+assem.o : ../chap9/assem.c
+	cc -g -c ../chap9/assem.c
+
+codegen.o : ../chap9/codegenx86.c
+	cc -g -c ../chap9/codegenx86.c -o codegen.o
 
 clean: 
 	rm -f a.out *.o

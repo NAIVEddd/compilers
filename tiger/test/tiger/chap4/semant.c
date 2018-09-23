@@ -441,7 +441,8 @@ Tr_exp transDec(S_table venv, S_table tenv, Tr_level level, A_dec d)
             Ty_tyList formalTys = makeFormalTyList(tenv, f->params);
             S_enter(venv, f->name, E_FunEntry(level, Temp_newlabel(), formalTys, resultTy));
         }
-    
+
+        T_stm funcList = NULL;
         for (A_fundecList fl = d->u.function; fl; fl = fl->tail)
         {
             A_fundec f = fl->head;
@@ -457,6 +458,16 @@ Tr_exp transDec(S_table venv, S_table tenv, Tr_level level, A_dec d)
                 }
             }
             return transExp(venv, tenv, level, f->body).exp;
+
+            T_exp funcDecExp = transExp(venv, tenv, level, f->body).exp;
+            if(funcList == NULL)
+            {
+                funcList = T_Exp(funcDecExp);
+            }
+            else
+            {
+                funcList = T_Seq(funcList, T_Exp(funcDecExp));
+            }
             S_endScope(venv);
         }
 

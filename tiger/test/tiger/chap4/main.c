@@ -5,6 +5,7 @@
 #include "parse.h"
 #include "../chap7/printtree.h"
 #include "../chap8/canon.h"
+#include "../chap9/codegen.h"
 #include <stdio.h>
 A_exp absyn_root;
 
@@ -22,7 +23,12 @@ int main()
         
         struct expty ety = transExp(venv, tenv, level, MakeQueensTig());
         T_stmList stmList = C_linearize(T_Exp(ety.exp));
+        struct C_block block = C_basicBlocks(stmList);
+        stmList = C_traceSchedule(block);
         printStmList(stdout, stmList);
+
+        F_frame frame = F_NewFrame(Temp_newlabel(), NULL);
+        AS_instrList instrList = F_codegen(frame, stmList);
     }
 
     return 0;
