@@ -68,7 +68,7 @@ Tr_exp Tr_simpleVar(Tr_access access, Tr_level level)
 Tr_exp Tr_subscriptVar(Tr_access array, Tr_level level, Tr_exp index)
 {
     T_exp mem = F_Exp(array->access, Tr_StaticLink(array, level));
-    return T_Mem(T_Binop(T_plus, mem, T_Binop(T_mul, T_Const(F_wordSize), index)));
+    return T_Mem(T_Binop(T_plus, T_Binop(T_plus, mem, T_Binop(T_mul, T_Const(F_wordSize), index)), T_Const(0)));
 }
 
 Tr_exp Tr_String(string s)

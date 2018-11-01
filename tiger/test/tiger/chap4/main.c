@@ -6,11 +6,13 @@
 #include "../chap7/printtree.h"
 #include "../chap8/canon.h"
 #include "../chap9/codegen.h"
+#include "../chap6/frame.h"
 #include <stdio.h>
 A_exp absyn_root;
 
 int main()
 {
+    AS_instrList instrList;
     {
         Tr_level level = Tr_Outermost();
         S_table venv = E_base_venv();
@@ -21,6 +23,8 @@ int main()
         S_enter(tenv, S_Symbol("nil"), Ty_Nil());
         S_enter(venv, S_Symbol("print"), E_FunEntry(level, Temp_newlabel(), Ty_TyList(Ty_String(), NULL), Ty_Void()));
         
+        F_tempMap = Temp_empty();
+
         struct expty ety = transExp(venv, tenv, level, MakeQueensTig());
         T_stmList stmList = C_linearize(T_Exp(ety.exp));
         struct C_block block = C_basicBlocks(stmList);
@@ -28,7 +32,10 @@ int main()
         printStmList(stdout, stmList);
 
         F_frame frame = F_NewFrame(Temp_newlabel(), NULL);
-        AS_instrList instrList = F_codegen(frame, stmList);
+        instrList = F_codegen(frame, stmList);
+        Temp_dumpMap(stdout, F_tempMap);
+        fprintf(stdout, "BEGIN %s\n", Temp_labelstring(F_Name(frame)));
+        AS_printInstrList(stdout, instrList, Temp_layerMap(F_tempMap,Temp_name()));
     }
 
     return 0;
