@@ -145,18 +145,18 @@ done
 # recv ctrl+c , then kill all worker
 trap "NotifyFD 1 6 6" SIGINT
 
-loopcount=1
+loopcount=0
 while [ $loopcount != $(($loopTime+$threadnumber)) ]
 do
     read -u 6 status
     case $status in
         Success*)
+            loopcount=$(($loopcount+1))
             # wait all task success then exit
             if [ $loopcount -gt $loopTime ]
             then
                 continue
             fi
-            loopcount=$(($loopcount+1))
             # close old pipe fd and open new one
             fd=$(echo "$status" | awk '{print $2}')
             if [ $fd'x' != 'x' ]
