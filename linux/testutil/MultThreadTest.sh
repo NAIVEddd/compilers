@@ -151,12 +151,12 @@ do
     read -u 6 status
     case $status in
         Success*)
-            loopcount=$(($loopcount+1))
             # wait all task success then exit
-            if [ $loopcount -ge $loopTime ]
+            if [ $loopcount -gt $loopTime ]
             then
                 continue
             fi
+            loopcount=$(($loopcount+1))
             # close old pipe fd and open new one
             fd=$(echo "$status" | awk '{print $2}')
             if [ $fd'x' != 'x' ]
